@@ -1,0 +1,17 @@
+{
+  "name": "colophon",
+  "version": "2.5.0",
+  "private": true,
+  "description": "Edition inspector, imprint editor and bindery for EPUB files. Editorial Dusk & Dawn design system.",
+  "type": "module",
+  "scripts": {
+    "tokens": "node design/build-tokens.mjs --css src/styles/tokens.css --fonts src/styles/fonts",
+    "icons": "node scripts/build-icons.mjs",
+    "lint:colours": "node scripts/check-colours.mjs",
+    "check": "node design/build-tokens.mjs --check && node scripts/check-colours.mjs",
+    "serve": "python3 -m http.server 5173"
+  },
+  "devDependencies": {
+    "lucide-static": "1.68.0"
+  }
+}
