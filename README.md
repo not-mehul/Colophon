@@ -2,7 +2,7 @@
 
 An edition inspector, imprint editor and bindery for EPUB files. Open an EPUB, see how well it is put together, fix its metadata, cover, chapter order and contents, and bind a clean copy. It runs in the browser and as an Android and iOS app, and everything stays on your device.
 
-Colophon uses **Editorial Dusk & Dawn**, the design system it shares with Waymark, BookShelf and Ledger. The spec is [`design/style.md`](design/style.md).
+Colophon uses **Editorial Dusk & Dawn**, the design system it shares with Waymark, BookShelf, Ledger and Rosetta. Everything shared (tokens, Fraunces, the shared components and the colour checks) comes from one package, [`dusk-dawn`](https://github.com/not-mehul/dusk-dawn), whose `style.md` is the spec.
 
 ## What it does
 
@@ -49,25 +49,21 @@ npm run assets       # redraw the app icon and splash screens
 | `src/epub/` | The EPUB core, with no UI: open, validate, audit, accessibility, bind, build, file names, the table of contents |
 | `src/catalog/` | Catalog sources, ISBN handling, match confidence and the offline cache |
 | `src/state/` | The bench (the open edition and its draft), the library, settings, batch fixes and UI state |
-| `src/components/` | The views and sheets; `ui/` holds the shared pieces (TabRail, Toast and ThemeToggle are identical to the other apps) |
+| `src/components/` | The views and sheets; `ui/` holds Colophon's own pieces; TabRail, Toast and ThemeToggle come from `dusk-dawn` |
 | `src/platform/` | Native bridges: files, share, haptics, the scanner, secrets, theme |
 | `src/render/` | Canvas drawing: cover plates, crops, thumbnails and the report card |
-| `src/styles/` | `tokens.css` (generated), `components.css` (shared, identical to the other apps) and `app.css` |
+| `src/styles/` | `app.css`, which imports `dusk-dawn/tokens.css` and `dusk-dawn/components.css` first |
 | `tests/` | Vitest unit tests with EPUB 2, EPUB 3 and broken fixtures, and the Playwright smoke test |
 | `android/`, `ios/` | The Capacitor projects |
-| `design/` | `style.md`, `tokens.json`, `build-tokens.mjs` and the Fraunces fonts, identical to the other three apps |
 
 ## Design tokens
 
-Edit `design/tokens.json`, never `tokens.css`:
+Tokens, fonts and the shared components live in the [`dusk-dawn`](https://github.com/not-mehul/dusk-dawn) package, installed at a tag. To change the design, change the package, tag a release, and move the tag in `package.json` (`style.md` §18). `dusk-dawn check` (part of `npm run check`) tests contrast in both themes, and `dusk-dawn colours` (part of `npm run lint`) fails on any literal colour in `src/`.
 
 ```sh
-npm run tokens       # regenerate src/styles/tokens.css and copy the fonts
 npm run icons        # regenerate src/components/ui/icons.ts after using a new Lucide name
 ```
 
-`scripts/check-colours.mjs` (part of `npm run lint`) fails on any literal colour in `src/`.
-
 ## Licences
 
-Fraunces: SIL Open Font License (`design/fonts/Fraunces-OFL.txt`). Lucide: ISC. fflate and Dexie: MIT and Apache 2.0. ZXing: Apache 2.0.
+Fraunces: SIL Open Font License (shipped in `dusk-dawn`). Lucide: ISC. fflate and Dexie: MIT and Apache 2.0. ZXing: Apache 2.0.
