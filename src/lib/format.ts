@@ -20,3 +20,18 @@ export function relativeDay(when: number, now = Date.now()): string {
 export function blobUrl(bytes: Uint8Array | null | undefined, type = 'image/jpeg'): string | null {
   return bytes?.length ? URL.createObjectURL(new Blob([bytes as BlobPart], { type })) : null;
 }
+
+/** Words a reader gets through in a minute of steady reading, for the estimate. */
+export const READING_WPM = 238;
+
+export function readingMinutes(words: number): number {
+  return words > 0 ? Math.max(1, Math.round(words / READING_WPM)) : 0;
+}
+
+/** "4 min", "2 h 15 min", "11 h". */
+export function readingTime(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}

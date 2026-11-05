@@ -1,6 +1,7 @@
 <script lang="ts">
   // The library bench: recent editions as cards with their scores. A long
   // press selects editions for batch fixes, removal or sending to BookShelf.
+  import { tierOf } from '../epub/audit';
   import { sampleEpub } from '../epub/sample';
   import { plural } from '../lib/format';
   import { EPUB_ACCEPT, fileBytes, pickFile } from '../lib/pick';
@@ -9,6 +10,8 @@
   import { sampleCover } from '../render/plate';
   import { bench } from '../state/bench.svelte';
   import { library } from '../state/library.svelte';
+  import type { BenchSort } from '../state/settings';
+  import { settings } from '../state/settings.svelte';
   import { ui } from '../state/ui.svelte';
   import BatchSheet from './BatchSheet.svelte';
   import EditionCard from './EditionCard.svelte';
@@ -16,7 +19,41 @@
   import Icon from './ui/Icon.svelte';
 
   let batchOpen = $state(false);
+  let query = $state('');
   const selecting = $derived(library.selected.length > 0);
+  const sort = $derived(settings.value.benchSort);
+  /** The filter shows once the bench is long enough to need one. */
+  const FILTER_FROM = 6;
+
+  const SORTS: { id: BenchSort; label: string }[] = [
+    { id: 'recent', label: 'Recent' },
+    { id: 'score', label: 'Score' },
+    { id: 'title', label: 'Title' },
+  ];
+
+  /** "The Waves" files under W, as on a shelf. */
+  const shelfKey = (title: string) => title.trim().replace(/^(the|a|an)\s+/i, '');
+
+  const shown = $derived.by(() => {
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const list = words.length
+      ? library.items.filter((e) => {
+          const hay = `${e.title} ${e.creator} ${e.fileName}`.toLowerCase();
+          return words.every((w) => hay.includes(w));
+        })
+      : [...library.items];
+    if (sort === 'score') list.sort((a, b) => a.score - b.score || b.openedAt - a.openedAt);
+    else if (sort === 'title') list.sort((a, b) => shelfKey(a.title || a.fileName).localeCompare(shelfKey(b.title || b.fileName), undefined, { numeric: true, sensitivity: 'base' }));
+    return list;
+  });
+
+  const summary = $derived.by(() => {
+    const items = library.items;
+    const ready = items.filter((e) => tierOf(e.score).name === 'Ready').length;
+    const unsaved = items.filter((e) => e.draft).length;
+    const mean = items.length ? Math.round(items.reduce((sum, e) => sum + e.score, 0) / items.length) : 0;
+    return { ready, unsaved, mean };
+  });
 
   export async function openFile() {
     const file = await pickFile(EPUB_ACCEPT);
@@ -64,14 +101,39 @@
       <h2 class="t-section-heading" id="benchHeading">The <em>bench</em></h2>
       <span class="t-data-small dim">{plural(library.items.length, 'edition')}</span>
     </div>
+    {#if library.items.length > 1}
+      <p class="t-data-small dim shelf-line" id="shelfLine">
+        <span>Average <span class="tabular" style:color="var({tierOf(summary.mean).cssVar})">{summary.mean}</span></span>
+        <span>· {summary.ready} ready to shelve</span>
+        {#if summary.unsaved}<span>· <span class="amber">{summary.unsaved} with unsaved edits</span></span>{/if}
+      </p>
+    {/if}
     <div class="btn-row btn-row-start">
       <button type="button" class="btn btn-primary" id="openEpub" onclick={() => void openFile()}><Icon name="folder-open" />Open EPUB</button>
       <button type="button" class="btn btn-secondary" id="newEdition" onclick={() => ui.open('builder')}><Icon name="feather" />New edition</button>
       <button type="button" class="btn btn-muted" onclick={() => void openSample()}>Sample</button>
     </div>
-    <p class="field-hint bench-hint">Long-press an edition to select several for batch fixes.</p>
+    {#if library.items.length > 1}
+      <div class="bench-tools">
+        <div class="segmented" role="radiogroup" aria-label="Order the bench by">
+          {#each SORTS as s (s.id)}
+            <button type="button" role="radio" aria-checked={sort === s.id} onclick={() => void settings.update({ benchSort: s.id })}>{s.label}</button>
+          {/each}
+        </div>
+        {#if library.items.length >= FILTER_FROM}
+          <input class="input" type="search" id="benchFilter" placeholder="Find by title, author or file" aria-label="Find an edition" enterkeyhint="search" autocomplete="off" bind:value={query} />
+        {/if}
+      </div>
+    {/if}
+    <p class="field-hint bench-hint">
+      {sort === 'score' ? 'Weakest first, so the next one to mend is at the top. ' : ''}Long-press an edition to select several for batch fixes.
+    </p>
+    {#if !shown.length}
+      <p class="empty-match">No edition matches “{query.trim()}”.</p>
+      <div class="btn-row"><button type="button" class="btn btn-muted" onclick={() => (query = '')}>Clear filter</button></div>
+    {/if}
     <ul class="edition-list" aria-label="Recent editions">
-      {#each library.items as edition (edition.id)}
+      {#each shown as edition (edition.id)}
         <li>
           <EditionCard
             {edition}

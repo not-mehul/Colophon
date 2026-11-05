@@ -5,6 +5,7 @@ import { DEFAULT_RENAME, DEFAULT_TEMPLATE } from '../epub/filename';
 
 export type ThemeSetting = 'system' | 'dark' | 'light';
 export type PlateStyle = 'classic' | 'minimal' | 'noir' | 'eink';
+export type BenchSort = 'recent' | 'score' | 'title';
 
 export interface Settings {
   theme: ThemeSetting;
@@ -19,6 +20,8 @@ export interface Settings {
   exportTemplate: string;
   renamePattern: string;
   shelfOrder: string;
+  /** How the bench is ordered. */
+  benchSort: BenchSort;
   /** The edition on the bench when the app last closed. */
   lastEditionId: string | null;
 }
@@ -36,6 +39,7 @@ export const DEFAULT_SETTINGS: Settings = {
   exportTemplate: DEFAULT_TEMPLATE,
   renamePattern: DEFAULT_RENAME,
   shelfOrder: '01',
+  benchSort: 'recent',
   lastEditionId: null,
 };
 
@@ -45,6 +49,7 @@ const CHOICES = {
   maxCatalogResults: [6, 8, 12],
   minCoverWidth: [800, 1000, 1200],
   compression: [3, 6, 9],
+  benchSort: ['recent', 'score', 'title'],
 } as const;
 
 /** Stored settings over the defaults, dropping anything a newer or older version left that doesn't fit. */

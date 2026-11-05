@@ -55,6 +55,9 @@ export const TIERS: readonly Tier[] = [
   { min: -Infinity, name: 'Broken', cssVar: '--scale-5', verdict: 'Needs repair', hint: 'Start with the validation list: some readers will refuse this file.' },
 ];
 
+/** Characters of synopsis that earn the imprint its synopsis marks. */
+export const SYNOPSIS_MIN = 30;
+
 export function tierOf(score: number): Tier {
   return TIERS.find((t) => score >= t.min) ?? TIERS[TIERS.length - 1]!;
 }
@@ -105,7 +108,7 @@ export function runAudit(edition: Edition, draft: Draft, issues: Issue[], access
       score += 4;
       items.push({ status: 'pass', text: `Identifier: ${meta.identifier.trim()}` });
     } else items.push({ status: 'warn', text: 'No ISBN or other identifier' });
-    if (meta.description.trim().length >= 30) {
+    if (meta.description.trim().length >= SYNOPSIS_MIN) {
       score += 4;
       items.push({ status: 'pass', text: `Synopsis (${plural(meta.description.trim().length, 'character')})` });
     } else items.push({ status: 'warn', text: 'The synopsis is missing or very short' });

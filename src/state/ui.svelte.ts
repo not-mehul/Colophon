@@ -40,6 +40,7 @@ export type Overlay =
   | 'a11y'
   | 'builder'
   | 'report'
+  | 'proof'
   | null;
 
 /** How long a toast stays (style.md §8.12): longer when it offers an action. */

@@ -4,6 +4,7 @@
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
   import ChapterOrder from './ChapterOrder.svelte';
+  import ChapterShape from './ChapterShape.svelte';
   import TocEditor from './TocEditor.svelte';
   import Icon from './ui/Icon.svelte';
 
@@ -48,6 +49,7 @@
       </div>
     </div>
   {/if}
+  <ChapterShape />
   <ChapterOrder />
 </section>
 

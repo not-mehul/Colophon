@@ -49,3 +49,35 @@ test('inspect, mend and bind the sample edition', async ({ page }) => {
   await expect(page.locator('.edition-card')).toContainText(String(after));
   expect(errors).toEqual([]);
 });
+
+test('the proof lists each change and puts one back', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+
+  await page.goto('/');
+  await page.click('#trySample');
+  await expect(page.locator('#verdictHeading')).toBeVisible();
+
+  // A fix from the ledger shows what it was worth.
+  await page.getByRole('button', { name: 'Remove orphans' }).click();
+  await expect(page.locator('#scoreGain')).toContainText('+');
+  await expect(page.locator('#nextGain')).toContainText('Most to gain');
+
+  await page.click('#tab-imprint');
+  await page.fill('#metaTitle', 'A Proof Copy');
+  await expect(page.locator('#identifierHint')).toBeVisible();
+
+  await page.click('#changeCount');
+  const sheet = page.getByRole('dialog', { name: 'The proof' });
+  await expect(sheet).toContainText('A Proof Copy');
+  await expect(sheet).toContainText('Orphan files');
+  await sheet.getByRole('button', { name: 'Put back Title' }).click();
+  await expect(sheet).not.toContainText('A Proof Copy');
+  await sheet.getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('#metaTitle')).toHaveValue('The Art of Digital Bookmaking');
+
+  // The shape of the book follows the reading order.
+  await page.keyboard.press('3');
+  await expect(page.locator('.shape-bar')).not.toHaveCount(0);
+  expect(errors).toEqual([]);
+});

@@ -44,3 +44,47 @@ export function formatIsbn(isbn: string): string {
   const clean = cleanIsbn(isbn);
   return clean.length === 13 ? `${clean.slice(0, 3)}-${clean.slice(3)}` : clean;
 }
+
+/** The check digit an ISBN-13 should end with, from its first twelve digits. */
+export function isbn13CheckDigit(first12: string): string {
+  const sum = [...first12.slice(0, 12)].reduce((acc, d, i) => acc + Number(d) * (i % 2 ? 3 : 1), 0);
+  return String((10 - (sum % 10)) % 10);
+}
+
+/** The check digit an ISBN-10 should end with ("X" for ten), from its first nine digits. */
+export function isbn10CheckDigit(first9: string): string {
+  const sum = [...first9.slice(0, 9)].reduce((acc, d, i) => acc + Number(d) * (10 - i), 0);
+  const check = (11 - (sum % 11)) % 11;
+  return check === 10 ? 'X' : String(check);
+}
+
+export type IdentifierCheck =
+  | { kind: 'empty' }
+  | { kind: 'isbn13'; isbn: string }
+  | { kind: 'isbn10'; isbn: string; as13: string }
+  | { kind: 'bad-check'; length: 10 | 13; expected: string; corrected: string }
+  | { kind: 'not-isbn' };
+
+/**
+ * What an identifier is, for the hint under the field: a sound ISBN, one
+ * with a wrong check digit (and the digit it should have), or something else
+ * (a UUID, a publisher's own code), which is fine but isn't an ISBN.
+ */
+export function checkIdentifier(value: string): IdentifierCheck {
+  const raw = value.trim();
+  if (!raw) return { kind: 'empty' };
+  // Only digits, hyphens, spaces and a final X (with an optional urn:isbn:) look like an ISBN.
+  if (!/^(urn:isbn:)?[\d\s-]+[\dXx]?$/i.test(raw)) return { kind: 'not-isbn' };
+  const isbn = cleanIsbn(raw);
+  if (isbn.length === 13 && /^\d{13}$/.test(isbn)) {
+    if (isValidIsbn13(isbn)) return { kind: 'isbn13', isbn };
+    const expected = isbn13CheckDigit(isbn);
+    return { kind: 'bad-check', length: 13, expected, corrected: isbn.slice(0, 12) + expected };
+  }
+  if (isbn.length === 10 && /^\d{9}[\dX]$/.test(isbn)) {
+    if (isValidIsbn10(isbn)) return { kind: 'isbn10', isbn, as13: isbn10to13(isbn) };
+    const expected = isbn10CheckDigit(isbn);
+    return { kind: 'bad-check', length: 10, expected, corrected: isbn.slice(0, 9) + expected };
+  }
+  return { kind: 'not-isbn' };
+}

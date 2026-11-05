@@ -4,7 +4,8 @@
 
 import { addLang, inspectAccessibility, sortTocBySpine, suggestA11y, writeAltText } from '../epub/accessibility';
 import { text } from '../epub/archive';
-import { runAudit, type Audit } from '../epub/audit';
+import { runAudit, tierOf, TIERS, type Audit } from '../epub/audit';
+import { describeChanges } from '../epub/changes';
 import { bind } from '../epub/bind';
 import { changeCount, cloneDraft, effectiveCover, effectiveToc, newDraft, remainingOrphans } from '../epub/draft';
 import { formatFileName, numberChapters } from '../epub/filename';
@@ -13,6 +14,7 @@ import { openEpub } from '../epub/open';
 import { tocFromChapters } from '../epub/toc';
 import type { Draft, Edition, Meta, TocEntry } from '../epub/types';
 import { applyFix, fixAll, validate, type Fix } from '../epub/validate';
+import { tap } from '../platform/haptics';
 import { saveFile, shareFile } from '../platform/output';
 import { thumbnail } from '../render/image';
 import { library } from './library.svelte';
@@ -53,6 +55,18 @@ class BenchState {
       : { score: 0, checks: [] },
   );
   changes = $derived(this.edition ? changeCount(this.edition, this.draft) : 0);
+  /** Every change, said plainly, each with its own revert (the proof sheet). */
+  proof = $derived(this.edition ? describeChanges(this.edition, this.draft) : []);
+  /** The inspection of the file as opened (or as last bound), before any edit. */
+  baseline: Audit = $derived(this.edition ? this.auditOf(this.edition, newDraft(this.edition)) : { score: 0, checks: [] });
+  /** Points the edits have added (or cost) since the file was opened. */
+  gain = $derived(this.edition ? this.audit.score - this.baseline.score : 0);
+  /** The check with the most points still to win, for "Most to gain". */
+  nextGain = $derived(
+    this.audit.checks
+      .filter((c) => c.score < c.max)
+      .reduce<Audit['checks'][number] | null>((best, c) => (!best || c.max - c.score > best.max - best.score ? c : best), null),
+  );
   cover = $derived(this.edition ? effectiveCover(this.edition, this.draft) : null);
   toc: TocEntry[] = $derived(this.edition ? effectiveToc(this.edition, this.draft) : []);
   orphans = $derived(this.edition ? remainingOrphans(this.edition, this.draft) : []);
@@ -123,6 +137,7 @@ class BenchState {
 
   private show(id: string, edition: Edition, draft: Draft): void {
     this.flush();
+    this.lastTier = -1;
     this.edition = edition;
     this.draft = draft;
     this.id = id;
@@ -140,10 +155,42 @@ class BenchState {
 
   // ---------- saving edits ----------
 
-  scoreOf(edition: Edition, draft: Draft): number {
+  auditOf(edition: Edition, draft: Draft): Audit {
     const access = inspectAccessibility(edition, draft);
     const exportName = formatFileName(settings.value.exportTemplate, draft.meta, settings.value.shelfOrder);
-    return runAudit(edition, draft, validate(edition, draft), access, { minCoverWidth: settings.value.minCoverWidth, exportName }).score;
+    return runAudit(edition, draft, validate(edition, draft), access, { minCoverWidth: settings.value.minCoverWidth, exportName });
+  }
+
+  scoreOf(edition: Edition, draft: Draft): number {
+    return this.auditOf(edition, draft).score;
+  }
+
+  /** The tier last seen for this edition, so a rise can be felt (a haptic tap) once. */
+  private lastTier = -1;
+
+  /** Called whenever the score changes: a light tap when an edit lifts the edition into a better tier. */
+  noteTier(): void {
+    const index = TIERS.indexOf(tierOf(this.audit.score));
+    if (this.lastTier !== -1 && index < this.lastTier) tap();
+    this.lastTier = index;
+  }
+
+  // ---------- the proof ----------
+
+  /** Puts one change back, with Undo. */
+  revertChange(id: string): void {
+    const change = this.proof.find((c) => c.id === id);
+    if (!change) return;
+    this.withUndo(`${change.label} put back as it was.`, () => change.revert(this.draft));
+  }
+
+  /** Puts every change back, with Undo. */
+  revertAll(): void {
+    const edition = this.edition;
+    if (!edition || !this.changes) return;
+    this.withUndo(`${plural(this.proof.length, 'change')} put back. The edition is as it was opened.`, () => {
+      this.draft = newDraft(edition);
+    });
   }
 
   /** Saves the draft to the library shortly after the last edit. */
@@ -164,11 +211,11 @@ class BenchState {
   }
 
   /** Runs an edit with an undo toast that puts the draft back as it was. */
-  withUndo(message: string, edit: () => void): void {
+  withUndo(message: string | (() => string), edit: () => void): void {
     const before = cloneDraft($state.snapshot(this.draft) as Draft);
     edit();
     this.touch();
-    ui.undoable(message, () => {
+    ui.undoable(typeof message === 'function' ? message() : message, () => {
       this.draft = before;
       this.touch();
     });
@@ -305,10 +352,12 @@ class BenchState {
     const edition = this.edition;
     if (!edition) return;
     let count = 0;
-    this.withUndo('', () => {
-      count = fixAll(edition, this.draft);
-    });
-    ui.undoable(count ? `Applied ${plural(count, 'fix', 'fixes')}.` : 'Nothing left that Colophon can fix safely.', () => undefined);
+    this.withUndo(
+      () => (count ? `Applied ${plural(count, 'fix', 'fixes')}.` : 'Nothing left that Colophon can fix safely.'),
+      () => {
+        count = fixAll(edition, this.draft);
+      },
+    );
   }
 
   addLanguage(): void {
@@ -327,7 +376,7 @@ class BenchState {
     if (!edition) return 0;
     let written = 0;
     let skipped = 0;
-    this.withUndo('', () => {
+    this.withUndo(() => `Alt text written for ${plural(written, 'image')}.`, () => {
       for (const [doc, byIndex] of alts) {
         const next = writeAltText(this.draft.patched[doc] ?? text(edition.files.get(doc)), byIndex);
         if (next === null) skipped++;
@@ -338,7 +387,6 @@ class BenchState {
       }
     });
     if (skipped) ui.notify(`Fix the XHTML in ${plural(skipped, 'document')} first, then add its alt text.`, 'error');
-    else ui.undoable(`Alt text written for ${plural(written, 'image')}.`, () => undefined);
     return written;
   }
 

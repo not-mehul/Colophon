@@ -2,6 +2,8 @@
   import { tierOf } from './epub/audit';
   import { plural } from './lib/format';
   import { applyTheme, shown, toggledTheme } from './platform/theme.svelte';
+  import { EPUB_ACCEPT, fileBytes, pickFile } from './lib/pick';
+  import { shortcut } from './lib/keys';
   import { sendToBookShelf } from './platform/handoff';
   import { shareText } from './platform/output';
   import { bench } from './state/bench.svelte';
@@ -19,6 +21,7 @@
   import CropSheet from './components/sheets/CropSheet.svelte';
   import NewEditionFlow from './components/sheets/NewEditionFlow.svelte';
   import PlateComposer from './components/sheets/PlateComposer.svelte';
+  import ProofSheet from './components/sheets/ProofSheet.svelte';
   import ReportPreview from './components/sheets/ReportPreview.svelte';
   import SettingsSheet from './components/sheets/SettingsSheet.svelte';
   import ConfirmModal from './components/ui/ConfirmModal.svelte';
@@ -43,6 +46,11 @@
   let dropping = $state(false);
 
   $effect(() => applyTheme(settings.value.theme));
+  // A light tap when an edit lifts the edition into a better tier.
+  $effect(() => {
+    void bench.audit.score;
+    if (bench.edition) bench.noteTier();
+  });
 
   function close() {
     ui.close();
@@ -62,6 +70,25 @@
     else if (e.dataTransfer?.files.length) ui.notify('That isn’t an EPUB. Drop a .epub file.', 'error');
   }
 
+  async function openFile() {
+    const file = await pickFile(EPUB_ACCEPT);
+    if (file) await bench.openBytes(await fileBytes(file), file.name);
+  }
+
+  // Keyboard shortcuts, for the browser and a keyboard on a tablet. Listed in Settings.
+  function keydown(e: KeyboardEvent) {
+    const action = shortcut(e, { overlay: ui.overlay !== null || ui.confirmRequest !== null, edition: !!bench.edition });
+    if (!action) return;
+    e.preventDefault();
+    if (action === 'bind') {
+      if (bench.busy === null) void (bench.changes ? bench.bindAndSave() : ui.notify('Nothing to bind yet. The edition is as it was opened.'));
+    } else if (action === 'open') void openFile();
+    else if (action === 'undo') {
+      if (ui.toast?.action?.label === 'Undo') ui.actOnToast();
+    } else if (action === 'proof') ui.open('proof');
+    else ui.go(action.tab);
+  }
+
   async function toBookShelf() {
     const { title, creator, identifier } = bench.draft.meta;
     // BookShelf's own link first (style.md §14.1); the share sheet when it isn't installed.
@@ -71,7 +98,7 @@
   }
 </script>
 
-<svelte:window ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
+<svelte:window onkeydown={keydown} ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
 
 <div class="glow-layer" aria-hidden="true">
   <div class="glow glow-1"></div>
@@ -99,7 +126,7 @@
         <h2 class="t-card-title ellipsis" id="barTitle">{bench.draft.meta.title || 'Untitled edition'}</h2>
         <p class="t-data-small dim ellipsis">
           <span style:color="var({tier.cssVar})">{bench.audit.score} · {tier.name}</span>
-          {#if bench.changes}· <span class="amber" id="changeCount">{plural(bench.changes, 'change')} to bind</span>{:else}· {bench.edition.fileName}{/if}
+          {#if bench.changes}· <button type="button" class="link-inline amber" id="changeCount" aria-haspopup="dialog" onclick={() => ui.open('proof')}>{plural(bench.changes, 'change')} to bind</button>{:else}· {bench.edition.fileName}{/if}
         </p>
       </div>
       <div class="edition-bar-actions">
@@ -158,6 +185,8 @@
     <A11ySheet onclose={close} />
   {:else if ui.overlay === 'report'}
     <ReportPreview onclose={close} />
+  {:else if ui.overlay === 'proof'}
+    <ProofSheet onclose={close} />
   {/if}
 {/if}
 

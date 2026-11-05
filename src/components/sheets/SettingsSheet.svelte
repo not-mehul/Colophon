@@ -5,12 +5,14 @@
   import { settings } from '../../state/settings.svelte';
   import type { SecretKey, Settings } from '../../state/settings';
   import { ui } from '../../state/ui.svelte';
+  import { SHORTCUTS } from '../../lib/keys';
   import { isNative } from '../../platform/native';
   import Sheet from '../ui/Sheet.svelte';
   import Switch from '../ui/Switch.svelte';
 
   let { onclose }: { onclose: () => void } = $props();
   const v = $derived(settings.value);
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   const set = (patch: Partial<Settings>) => void settings.update(patch);
 
   const KEYS: { key: SecretKey; label: string; hint: string }[] = [
@@ -105,5 +107,11 @@
   <section class="settings-group">
     <h3 class="t-section-label">About</h3>
     <p class="t-body-small dim">Colophon {__APP_VERSION__}. An edition inspector, imprint editor and bindery for EPUB files.</p>
+    {#if !isNative}
+      <span class="t-field-label">Keyboard</span>
+      <dl class="keys">
+        {#each SHORTCUTS as s (s.keys)}<dt>{mac ? s.keys.replace('Ctrl', '⌘') : s.keys}</dt><dd>{s.does}</dd>{/each}
+      </dl>
+    {/if}
   </section>
 </Sheet>

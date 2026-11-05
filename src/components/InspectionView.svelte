@@ -4,7 +4,7 @@
   import { tierOf, type Check } from '../epub/audit';
   import type { Issue } from '../epub/validate';
   import { settle } from '../lib/appear';
-  import { fileSize, plural } from '../lib/format';
+  import { fileSize, plural, readingMinutes, readingTime } from '../lib/format';
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
   import { ui } from '../state/ui.svelte';
@@ -18,6 +18,17 @@
   const images = $derived(edition.manifest.filter((m) => m.mediaType.startsWith('image/')).length);
   const fixable = $derived(bench.issues.filter((i) => i.fix && i.fix.kind !== 'on-bind'));
   const failing = $derived(bench.issues.filter((i) => i.severity === 'fail').length);
+  const baseTier = $derived(tierOf(bench.baseline.score));
+  const before = $derived(new Map(bench.baseline.checks.map((c) => [c.id, c.score])));
+  const next = $derived(bench.nextGain);
+  const minutes = $derived(readingMinutes(edition.totalWords));
+
+  /** Brings a ledger row into view and puts focus on it, for "Most to gain". */
+  function showCheck(id: string) {
+    const row = document.getElementById(`check-${id}`);
+    row?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    row?.focus({ preventScroll: true });
+  }
 
   const STATUS_ICON: Record<string, IconName> = { pass: 'check', warn: 'triangle-alert', fail: 'circle-x' };
   const KIND_ICON: Record<Issue['kind'], IconName> = {
@@ -55,16 +66,31 @@
       <p class="eyebrow" style:color="var({tier.cssVar})">{tier.name}</p>
       <h2 class="t-verdict" id="verdictHeading">{tier.verdict}</h2>
       <p class="t-body-small dim">{tier.hint}</p>
+      {#if bench.gain !== 0}
+        <p class="t-data-small gain-line" id="scoreGain">
+          Opened at <span class="tabular">{bench.baseline.score}</span>
+          <span class="tabular" class:sage={bench.gain > 0} class:danger-text={bench.gain < 0}>{bench.gain > 0 ? '+' : '−'}{Math.abs(bench.gain)}</span>
+          {#if tier.name !== baseTier.name && bench.gain > 0}<span class="chip-status is-done">Up from {baseTier.name}</span>{/if}
+        </p>
+      {/if}
     </div>
   </div>
   <div class="hairline-grid stat-grid">
     <div class="stat-tile"><span class="t-stat tabular">{edition.chapters.length}</span><span class="t-field-label">Chapters</span></div>
-    <div class="stat-tile"><span class="t-stat tabular">{edition.totalWords >= 10000 ? `${Math.round(edition.totalWords / 1000)}k` : edition.totalWords.toLocaleString('en')}</span><span class="t-field-label">Words</span></div>
+    <div class="stat-tile"><span class="t-stat tabular">{edition.totalWords >= 10000 ? `${Math.round(edition.totalWords / 1000)}k` : edition.totalWords.toLocaleString('en')}</span><span class="t-field-label">Words · {minutes ? readingTime(minutes) : 'none'}</span></div>
     <div class="stat-tile"><span class="t-stat tabular">{images}</span><span class="t-field-label">Images</span></div>
     <div class="stat-tile"><span class="t-stat tabular">{fileSize(edition.fileSize)}</span><span class="t-field-label">EPUB {edition.version}</span></div>
   </div>
   <div class="btn-row btn-row-start">
     <button type="button" class="btn btn-secondary" id="shareReport" onclick={() => ui.open('report')}><Icon name="share-2" />Report card</button>
+    {#if next}
+      <button type="button" class="chip next-gain" id="nextGain" onclick={() => showCheck(next.id)}>
+        <Icon name="target" />Most to gain: {next.title}, {plural(next.max - next.score, 'point')}
+      </button>
+    {/if}
+    {#if bench.changes}
+      <button type="button" class="chip" id="openProof" aria-haspopup="dialog" onclick={() => ui.open('proof')}><Icon name="file-diff" />Review {plural(bench.changes, 'change')}</button>
+    {/if}
   </div>
 </section>
 
@@ -75,10 +101,14 @@
   <ol class="panel ledger" aria-label="Checks">
     {#each bench.audit.checks as check (check.id)}
       {@const fixes = quickFixes(check)}
-      <li class="ledger-row" id="check-{check.id}" use:settle={`row:${bench.id}:${check.id}`}>
+      {@const delta = check.score - (before.get(check.id) ?? check.score)}
+      <li class="ledger-row" id="check-{check.id}" tabindex="-1" use:settle={`row:${bench.id}:${check.id}`}>
         <div class="ledger-head">
           <h3 class="t-card-title">{check.title}</h3>
-          <span class="t-data-small tabular" class:amber={check.score < check.max}>{check.score} / {check.max}</span>
+          <span class="t-data-small tabular ledger-score">
+            {#if delta}<span class="ledger-delta" class:sage={delta > 0} class:danger-text={delta < 0} aria-label="{delta > 0 ? 'up' : 'down'} {Math.abs(delta)} since opened">{delta > 0 ? '+' : '−'}{Math.abs(delta)}</span>{/if}
+            <span class:amber={check.score < check.max}>{check.score} / {check.max}</span>
+          </span>
         </div>
         <Meter value={check.score} max={check.max} key="{bench.id}:{check.id}" label="{check.title}: {check.score} of {check.max}" />
         <ul class="check-items">
