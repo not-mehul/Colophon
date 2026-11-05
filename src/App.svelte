@@ -2,6 +2,7 @@
   import { tierOf } from './epub/audit';
   import { plural } from './lib/format';
   import { applyTheme, shown, toggledTheme } from './platform/theme.svelte';
+  import { sendToBookShelf } from './platform/handoff';
   import { shareText } from './platform/output';
   import { bench } from './state/bench.svelte';
   import { settings } from './state/settings.svelte';
@@ -62,7 +63,9 @@
   }
 
   async function toBookShelf() {
-    const { title, creator } = bench.draft.meta;
+    const { title, creator, identifier } = bench.draft.meta;
+    // BookShelf's own link first (style.md §14.1); the share sheet when it isn't installed.
+    if (await sendToBookShelf({ title, creator, isbn: identifier })) return;
     const line = creator ? `${title} by ${creator}` : title;
     if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
   }

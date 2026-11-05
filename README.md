@@ -38,6 +38,7 @@ npm run assets       # redraw the app icon and splash screens
 ```
 
 - **Open with.** Android registers a VIEW intent for `application/epub+zip`; iOS declares the `org.idpf.epub-container` document type. Both arrive through `appUrlOpen` (`src/platform/intake.ts`).
+- **Links between the apps.** Colophon registers `colophon://` (`colophon://open` brings it forward) and may ask whether its four siblings are installed. *Send to BookShelf* opens `bookshelf://log?title=…&author=…&isbn=…` when BookShelf is there, and falls back to the share sheet otherwise (`src/platform/handoff.ts`). The scheme convention is shared by all five apps (`src/platform/links.ts`, style.md §14.1).
 - **ISBN scanning.** On Android, Google's Code Scanner through `ColophonPlugin` (no camera permission). On iOS and in browsers, a camera view that reads frames with `BarcodeDetector`, or ZXing where that is missing.
 - **System.** The back button closes the topmost sheet, then returns to Inspection, then to the bench. The system bars follow the theme, and the splash is Dusk's `--bg-grad-mid` behind the amber C.
 - Catalog and cover requests use native HTTP in the apps, so cover hosts don't need CORS headers. In a browser, a CORS proxy can be set in Settings.
