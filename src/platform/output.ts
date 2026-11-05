@@ -70,7 +70,7 @@ export async function shareFile(file: OutputFile, title: string): Promise<void> 
   await Share.share({ title, files: [uri] }).catch(() => undefined);
 }
 
-/** Shares text: the hand-off to BookShelf, which reads "Title by Author". */
+/** Shares text: the fallback hand-off to BookShelf, which reads "Title by Author". */
 export async function shareText(title: string, text: string): Promise<boolean> {
   try {
     if (isNative) await Share.share({ title, text, dialogTitle: 'Send to BookShelf' });
