@@ -11,6 +11,7 @@
   import Icon from './ui/Icon.svelte';
   import type { IconName } from './ui/icons';
   import Meter from './ui/Meter.svelte';
+  import Notice from './ui/Notice.svelte';
   import ScoreDial from './ui/ScoreDial.svelte';
 
   const edition = $derived(bench.edition!);
@@ -107,7 +108,7 @@
           <h3 class="t-card-title">{check.title}</h3>
           <span class="t-data-small tabular ledger-score">
             {#if delta}<span class="ledger-delta" class:sage={delta > 0} class:danger-text={delta < 0} aria-label="{delta > 0 ? 'up' : 'down'} {Math.abs(delta)} since opened">{delta > 0 ? '+' : '−'}{Math.abs(delta)}</span>{/if}
-            <span class:amber={check.score < check.max}>{check.score} / {check.max}</span>
+            <span class="ledger-mark" class:amber={check.score < check.max} class:sage={check.score >= check.max}>{#if check.score >= check.max}<Icon name="check" />{/if}{check.score} / {check.max}</span>
           </span>
         </div>
         <Meter value={check.score} max={check.max} key="{bench.id}:{check.id}" label="{check.title}: {check.score} of {check.max}" />
@@ -141,7 +142,7 @@
     {/if}
   </div>
   {#if !bench.issues.length}
-    <p class="empty-match">No problems found. Every file the package lists is present, well formed and linked.</p>
+    <Notice kind="success" title="No problems found" detail="Every file the package lists is present, well formed and linked." />
   {:else}
     <ul class="panel issue-list" aria-label="Problems">
       {#each bench.issues as issue (issue.key)}

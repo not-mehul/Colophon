@@ -163,7 +163,13 @@
 </div>
 
 {#if dropping}
-  <div class="drop-veil" aria-hidden="true"><p class="t-verdict">Drop the EPUB to open it</p></div>
+  <div class="drop-veil" aria-hidden="true">
+    <div class="drop-card">
+      <Icon name="book-open" />
+      <p class="t-verdict">Drop the <em>EPUB</em></p>
+      <p class="t-hint">It opens on the bench. Edits to the current edition are already saved.</p>
+    </div>
+  </div>
 {/if}
 
 {#if ui.overlay === 'settings'}

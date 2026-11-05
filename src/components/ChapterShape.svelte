@@ -37,6 +37,7 @@
           class="shape-bar"
           class:aux={!bar.linear}
           class:longest={bar.id === longest?.id}
+          class:lifted={bar.id === ui.dragChapter}
           aria-label="Preview {bar.title}"
           onclick={() => preview(bar.id)}
         >
