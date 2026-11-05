@@ -1,0 +1,73 @@
+# Colophon
+
+An edition inspector, imprint editor and bindery for EPUB files. Open an EPUB, see how well it is put together, fix its metadata, cover, chapter order and contents, and bind a clean copy. It runs in the browser and as an Android and iOS app, and everything stays on your device.
+
+Colophon uses **Editorial Dusk & Dawn**, the design system it shares with Waymark, BookShelf and Ledger. The spec is [`design/style.md`](design/style.md).
+
+## What it does
+
+- **The bench.** Recent editions as cards with their scores. Long-press to select several, then fix them in one go (both cover tags, orphan files, numbered chapter files, safe validation fixes, the file name template), remove them, or send them to BookShelf.
+- **Inspection.** A score out of 100 over seven checks, a validation list in the manner of EPUBCheck (missing files, broken links, missing fonts and images, XHTML that isn't well formed) with one-tap fixes, an accessibility row (alt text, languages, reading order, EPUB Accessibility 1.1 metadata), and a 1080 × 1350 report card to share.
+- **Imprint.** Title, authors, ISBN, publisher, language, series, subjects and synopsis, with the publication date picked on a calendar. Covers can be chosen, found online, composed as a typographic plate (Classic, Minimal, Noir with its glow taken from the current cover, or E-ink in greys), and cropped to 1600 × 2400.
+- **Chapters.** Drag to reorder (with a haptic tap on the phone), rename or number the files, preview a chapter in a sandboxed frame, edit the table of contents (written to both the nav and the NCX), and set the bound file's name from a template.
+- **Catalog.** Google Books, Open Library, ISBNdb and a custom catalog, by title or by an ISBN typed or scanned with the camera. Results are kept, so searches you've made before work offline. Import fields one by one; every import, sort and reset can be undone.
+- **New edition.** A four-step builder that sets a Markdown or text manuscript as an EPUB 3 with a nav, an NCX and accessibility metadata.
+
+Edits are saved as you make them, so an edition reopens where you left it. Binding writes over the copy saved before (`Documents/Colophon/` in the apps, a download in the browser), and the bound file becomes the new starting point.
+
+## Run it
+
+```sh
+npm install
+npm run dev          # http://localhost:5173
+npm run check        # tokens, lint, literal colours, typecheck, unit tests
+npm run test:e2e     # builds, then a Playwright smoke test at phone size
+```
+
+Svelte 5, TypeScript and Vite. The library lives in IndexedDB (Dexie). API keys go to the platform's secure storage (the Keychain on iOS, the Android Keystore), or to localStorage in the browser.
+
+## The apps
+
+Capacitor 8 wraps the same build for Android and iOS.
+
+```sh
+npm run android      # build, sync and open Android Studio
+npm run android:apk  # a debug APK
+npm run ios          # build, sync and open Xcode
+npm run assets       # redraw the app icon and splash screens
+```
+
+- **Open with.** Android registers a VIEW intent for `application/epub+zip`; iOS declares the `org.idpf.epub-container` document type. Both arrive through `appUrlOpen` (`src/platform/intake.ts`).
+- **ISBN scanning.** On Android, Google's Code Scanner through `ColophonPlugin` (no camera permission). On iOS and in browsers, a camera view that reads frames with `BarcodeDetector`, or ZXing where that is missing.
+- **System.** The back button closes the topmost sheet, then returns to Inspection, then to the bench. The system bars follow the theme, and the splash is Dusk's `--bg-grad-mid` behind the amber C.
+- Catalog and cover requests use native HTTP in the apps, so cover hosts don't need CORS headers. In a browser, a CORS proxy can be set in Settings.
+
+## Layout
+
+| Path | What it is |
+|---|---|
+| `src/epub/` | The EPUB core, with no UI: open, validate, audit, accessibility, bind, build, file names, the table of contents |
+| `src/catalog/` | Catalog sources, ISBN handling, match confidence and the offline cache |
+| `src/state/` | The bench (the open edition and its draft), the library, settings, batch fixes and UI state |
+| `src/components/` | The views and sheets; `ui/` holds the shared pieces (TabRail, Toast and ThemeToggle are identical to the other apps) |
+| `src/platform/` | Native bridges: files, share, haptics, the scanner, secrets, theme |
+| `src/render/` | Canvas drawing: cover plates, crops, thumbnails and the report card |
+| `src/styles/` | `tokens.css` (generated), `components.css` (shared, identical to the other apps) and `app.css` |
+| `tests/` | Vitest unit tests with EPUB 2, EPUB 3 and broken fixtures, and the Playwright smoke test |
+| `android/`, `ios/` | The Capacitor projects |
+| `design/` | `style.md`, `tokens.json`, `build-tokens.mjs` and the Fraunces fonts, identical to the other three apps |
+
+## Design tokens
+
+Edit `design/tokens.json`, never `tokens.css`:
+
+```sh
+npm run tokens       # regenerate src/styles/tokens.css and copy the fonts
+npm run icons        # regenerate src/components/ui/icons.ts after using a new Lucide name
+```
+
+`scripts/check-colours.mjs` (part of `npm run lint`) fails on any literal colour in `src/`.
+
+## Licences
+
+Fraunces: SIL Open Font License (`design/fonts/Fraunces-OFL.txt`). Lucide: ISC. fflate and Dexie: MIT and Apache 2.0. ZXing: Apache 2.0.
