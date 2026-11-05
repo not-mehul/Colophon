@@ -3,12 +3,20 @@
 // hsl() or a named colour in a colour property) appears outside the generated
 // tokens.css. rgba(var(--token-rgb), a) is allowed: the colour is still a token.
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const files = ['index.html', 'src/styles/app.css', 'src/app.js'];
+function walk(dir) {
+  return readdirSync(join(root, dir)).flatMap((name) => {
+    const path = `${dir}/${name}`;
+    if (statSync(join(root, path)).isDirectory()) return walk(path);
+    // tokens.css is generated from design/tokens.json; icons.ts is Lucide markup.
+    return /\.(ts|svelte|css)$/.test(name) && !/(^tokens\.css|^icons\.ts)$/.test(name) ? [path] : [];
+  });
+}
+const files = ['index.html', ...walk('src')];
 
 const patterns = [
   { re: /#[0-9a-fA-F]{3,8}\b(?![-\w])/g, what: 'hex colour' },
