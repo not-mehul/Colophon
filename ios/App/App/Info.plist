@@ -91,5 +91,23 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Colophon uses the camera to scan the ISBN barcode on a book.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>io.github.notmehul.colophon</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>colophon</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>waymark</string>
+		<string>bookshelf</string>
+		<string>ledger</string>
+		<string>rosetta</string>
+	</array>
 </dict>
 </plist>
