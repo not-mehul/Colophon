@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 import svelteConfig from './svelte.config.js';
 
 export default tseslint.config(
-  { ignores: ['dist/', 'android/', 'ios/', 'node_modules/', 'test-results/', 'playwright-report/', 'design/'] },
+  { ignores: ['dist/', 'android/', 'ios/', 'node_modules/', 'test-results/', 'playwright-report/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...svelte.configs.recommended,

@@ -22,9 +22,7 @@
   import SettingsSheet from './components/sheets/SettingsSheet.svelte';
   import ConfirmModal from './components/ui/ConfirmModal.svelte';
   import Icon from './components/ui/Icon.svelte';
-  import TabRail from './components/ui/TabRail.svelte';
-  import ThemeToggle from './components/ui/ThemeToggle.svelte';
-  import Toast from './components/ui/Toast.svelte';
+  import { TabRail, ThemeToggle, Toast } from 'dusk-dawn';
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'inspection', label: 'Inspection' },
