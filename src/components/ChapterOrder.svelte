@@ -16,6 +16,8 @@
   let editing = $state<number | null>(null);
 
   const chapters = $derived(bench.draft.chapters);
+  /** Where each chapter sat in the file as opened, to show on rows that have moved. */
+  const opened = $derived(new Map((bench.edition?.chapters ?? []).map((c, i) => [c.id, i])));
   const words = $derived(new Map((bench.edition?.chapters ?? []).map((c) => [c.id, c.words])));
 
   function begin(e: PointerEvent, index: number) {
@@ -26,6 +28,7 @@
     startY = e.clientY;
     dragging = index;
     over = index;
+    ui.dragChapter = chapters[index]?.id ?? null;
     offset = 0;
     select();
   }
@@ -50,6 +53,7 @@
     dragging = null;
     over = null;
     offset = 0;
+    ui.dragChapter = null;
     if (from !== to) {
       bench.moveChapter(from, to);
       tap();
@@ -74,6 +78,15 @@
     return 'translateY(0)';
   }
 
+  /** The number a row will carry if the drag ends now, so the new order reads while you move. */
+  function position(index: number): number {
+    if (dragging === null || over === null) return index;
+    if (index === dragging) return over;
+    if (dragging < index && index <= over) return index - 1;
+    if (over <= index && index < dragging) return index + 1;
+    return index;
+  }
+
   function preview(id: string) {
     ui.previewChapter = id;
     ui.open('preview');
@@ -83,6 +96,8 @@
 <ol class="panel sig-list" class:is-dragging={dragging !== null} bind:this={list} aria-label="Reading order">
   {#each chapters as chapter, i (chapter.id)}
     {@const renamed = chapter.fileName !== chapter.path.slice(chapter.path.lastIndexOf('/') + 1)}
+    {@const was = opened.get(chapter.id) ?? i}
+    {@const at = position(i)}
     <li
       class="sig-row"
       class:lifted={dragging === i}
@@ -101,7 +116,10 @@
       >
         <Icon name="grip-vertical" />
       </button>
-      <span class="sig-index t-data-small tabular">{String(i + 1).padStart(2, '0')}</span>
+      <span class="sig-index t-data-small tabular" class:shifting={at !== i}>
+        {String(at + 1).padStart(2, '0')}
+        {#if was !== i && dragging === null}<span class="sig-was"><span class="visually-hidden">was </span>{String(was + 1).padStart(2, '0')}</span>{/if}
+      </span>
       <div class="sig-main">
         <p class="sig-title ellipsis">{bench.titles.get(chapter.id) || 'Untitled'}{#if !chapter.linear}<span class="chip-status">Outside the flow</span>{/if}</p>
         {#if editing === i}

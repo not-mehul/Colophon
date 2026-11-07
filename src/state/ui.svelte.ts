@@ -40,6 +40,7 @@ export type Overlay =
   | 'a11y'
   | 'builder'
   | 'report'
+  | 'proof'
   | null;
 
 /** How long a toast stays (style.md §8.12): longer when it offers an action. */
@@ -51,6 +52,8 @@ const TOAST_EXIT_MS = 160;
 class UiState {
   tab = $state<Tab>('inspection');
   overlay = $state<Overlay>(null);
+  /** The chapter being dragged in the reading order, so its bar can show it too. */
+  dragChapter = $state<string | null>(null);
   /** The chapter shown in the preview sheet. */
   previewChapter = $state<string | null>(null);
   /** The image waiting in the crop sheet. */

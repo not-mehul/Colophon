@@ -50,6 +50,39 @@ ol {
 .amber {
   color: var(--accent-amber);
 }
+.sage {
+  color: var(--accent-sage);
+}
+.danger-text {
+  color: var(--danger);
+}
+
+/* An inline text button (the change count, "Use ISBN-13"): the words are the
+   control, with the hit area grown to 44px without moving the line (§14). */
+.link-inline {
+  display: inline;
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-inline::after {
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
+}
+.link-inline:hover {
+  color: var(--text-heading);
+}
+.link-inline:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -248,7 +281,8 @@ ol {
     background-color var(--dur-hover),
     border-color var(--dur-hover);
 }
-.edition-card:hover {
+.edition-card:hover,
+.edition-card:active {
   background: var(--hover-bg);
 }
 .edition-card:focus-visible {
@@ -491,6 +525,47 @@ body:has(.batch-bar) {
 .stat-grid {
   grid-template-columns: repeat(2, 1fr);
 }
+.gain-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-dim);
+}
+.ledger-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.ledger-delta {
+  font-size: 0.6875rem;
+}
+.ledger-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.ledger-mark svg {
+  width: 14px;
+  height: 14px;
+}
+/* A field that no longer reads as it did in the file: a 5px amber square after its label. */
+.edited-mark {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 0.6em;
+  vertical-align: 0.15em;
+  border-radius: 1px;
+  background: var(--accent-amber);
+}
+.ledger-row:focus {
+  outline: none;
+}
+.ledger-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
 @media (min-width: 560px) {
   .stat-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -720,6 +795,25 @@ body:has(.batch-bar) {
 .sig-index {
   flex-shrink: 0;
   width: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  color: var(--text-faint);
+  transition: color var(--dur-hover);
+}
+/* While a chapter is dragged, the numbers it pushes aside read as their new
+   positions, in amber, so the order is legible before you let go. */
+.sig-index.shifting,
+.sig-row.lifted .sig-index {
+  color: var(--accent-amber);
+}
+.sig-row.lifted .sig-grip {
+  color: var(--accent-amber);
+}
+/* A moved chapter keeps its old number, struck, under the new one. */
+.sig-was {
+  font-size: 0.625rem;
+  text-decoration: line-through;
   color: var(--text-faint);
 }
 .sig-main {
@@ -751,6 +845,39 @@ body:has(.batch-bar) {
 .sig-file.amber {
   color: var(--accent-amber);
 }
+.sage {
+  color: var(--accent-sage);
+}
+.danger-text {
+  color: var(--danger);
+}
+
+/* An inline text button (the change count, "Use ISBN-13"): the words are the
+   control, with the hit area grown to 44px without moving the line (§14). */
+.link-inline {
+  display: inline;
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-inline::after {
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
+}
+.link-inline:hover {
+  color: var(--text-heading);
+}
+.link-inline:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
 .sig-rename {
   min-height: 36px;
   padding: 0.25rem 0.5rem;
@@ -763,6 +890,56 @@ body:has(.batch-bar) {
   .sig-words {
     display: none;
   }
+}
+
+/* The shape of the book: one bar per spine item, as tall as it is long. */
+.shape {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.shape-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 56px;
+  padding: 0 0 1px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.shape-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  max-width: 28px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.shape-bar > span {
+  display: block;
+  width: 100%;
+  border-radius: 1px 1px 0 0;
+  background: var(--series-1);
+  transition: background var(--dur-hover);
+}
+.shape-bar.aux > span {
+  background: var(--series-4);
+}
+.shape-bar.longest > span {
+  background: var(--accent-amber);
+}
+.shape-bar:hover > span,
+.shape-bar.lifted > span {
+  background: var(--accent-bright);
+}
+.shape-caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-1);
 }
 
 .toc-list {
@@ -1238,10 +1415,55 @@ body:has(.batch-bar) {
   z-index: 300;
   display: grid;
   place-items: center;
+  padding: var(--space-5);
   background: var(--modal-backdrop);
-  border: 2px dashed var(--accent-amber);
   pointer-events: none;
   animation: fade-in var(--dur-enter);
+}
+/* The drop target: a dashed frame with the modal's corner brackets, the way a
+   proof is marked for the printer. */
+.drop-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(100%, 420px);
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--modal-bg);
+  border: 1px dashed rgba(var(--accent-amber-rgb), 0.6);
+  border-radius: var(--radius);
+  box-shadow: 0 0 80px rgba(var(--accent-amber-rgb), 0.18);
+}
+.drop-card::before,
+.drop-card::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(var(--accent-amber-rgb), 0.5);
+}
+.drop-card::before {
+  top: -6px;
+  left: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.drop-card::after {
+  right: -6px;
+  bottom: -6px;
+  border-left: 0;
+  border-top: 0;
+}
+.drop-card > svg {
+  width: 40px;
+  height: 40px;
+  stroke-width: 1.25;
+  color: var(--accent-amber);
+}
+.drop-card .t-hint {
+  color: var(--text-dim);
 }
 
 /* ─── Camera barcode scanner (iOS and browsers) ──────────────── */
@@ -1296,4 +1518,75 @@ body:has(.batch-bar) {
   .settle-in {
     animation-name: fade-in;
   }
+}
+
+/* ─── The proof ──────────────────────────────────────────────── */
+
+.proof-summary .t-data-small {
+  overflow-wrap: anywhere;
+}
+.proof-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.proof-list {
+  border-top: 1px solid var(--border-faint);
+}
+.proof-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-faint);
+}
+.proof-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.proof-new {
+  color: var(--text-heading);
+}
+
+/* ─── The bench: sort and filter ─────────────────────────────── */
+
+.bench-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.bench-tools .segmented {
+  flex-shrink: 0;
+}
+.bench-tools .input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.shelf-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+}
+
+/* ─── Keyboard ───────────────────────────────────────────────── */
+
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  color: var(--text-body);
+}
+.keys dt {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
 }

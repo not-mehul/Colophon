@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanIsbn, isbnFromBarcode, isIsbn, isbn10to13 } from '../../src/catalog/isbn';
+import { checkIdentifier, cleanIsbn, isbnFromBarcode, isIsbn, isbn10to13 } from '../../src/catalog/isbn';
 import { confidence, largerCover } from '../../src/catalog/match';
 import { searchCatalogs, sourcesFor } from '../../src/catalog/search';
 import { parseGoogle, parseOpenLibrary, requestFor } from '../../src/catalog/sources';
@@ -88,5 +88,24 @@ describe('the offline catalog cache', () => {
     const nothing = await searchCatalogs('Bleak House', 'all', keys, 8, meta, { online: false });
     expect(nothing.results).toEqual([]);
     expect(nothing.failed).toEqual(['google', 'openlibrary']);
+  });
+});
+
+describe('the identifier hint', () => {
+  it('knows a sound ISBN-13 and ISBN-10', () => {
+    expect(checkIdentifier('978-0-14-143956-3')).toEqual({ kind: 'isbn13', isbn: '9780141439563' });
+    expect(checkIdentifier('0141439564')).toEqual({ kind: 'isbn10', isbn: '0141439564', as13: '9780141439563' });
+    expect(checkIdentifier('urn:isbn:9780141439563').kind).toBe('isbn13');
+  });
+
+  it('names the check digit a mistyped ISBN should have', () => {
+    expect(checkIdentifier('9780141439565')).toEqual({ kind: 'bad-check', length: 13, expected: '3', corrected: '9780141439563' });
+    expect(checkIdentifier('0141439560')).toMatchObject({ kind: 'bad-check', length: 10, expected: '4' });
+    expect(checkIdentifier('080442957')).toEqual({ kind: 'not-isbn' });
+  });
+
+  it('leaves other identifiers be', () => {
+    expect(checkIdentifier('urn:uuid:4f6c1d0e-8a1b-4b5e-9a39-2f6f4c1e0b77').kind).toBe('not-isbn');
+    expect(checkIdentifier('  ').kind).toBe('empty');
   });
 });
