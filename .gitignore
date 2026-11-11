@@ -3,3 +3,8 @@ dist/
 test-results/
 playwright-report/
 .DS_Store
+
+# Signing material — never commit keystores or their passwords
+*.jks
+*.keystore
+keystore.properties
