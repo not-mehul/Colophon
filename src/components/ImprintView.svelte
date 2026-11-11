@@ -1,6 +1,7 @@
 <script lang="ts">
   // Imprint: the cover and the Dublin Core fields. Every field writes to the
   // draft as it's typed; Reset puts the original back, with Undo.
+  import { hatch } from '../lib/delight';
   import { checkIdentifier, formatIsbn } from '../catalog/isbn';
   import { SYNOPSIS_MIN } from '../epub/audit';
   import { imageMime } from '../epub/image-size';
@@ -44,6 +45,14 @@
   }
 
   const LANGUAGES = ['en', 'en-GB', 'en-US', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'sv', 'da', 'no', 'fi', 'pl', 'cs', 'ru', 'ja', 'zh', 'ko', 'ar', 'he', 'hi'];
+
+  // An easter egg: the oldest placeholder in the trade, typed as a title.
+  let lorem = false;
+  $effect(() => {
+    const typed = /^\s*lorem ipsum\b/i.test(meta.title ?? '');
+    if (typed && !lorem) hatch('lorem', 'Lorem ipsum: set in type since the 1500s, and still waiting for the real copy.');
+    lorem = typed;
+  });
 </script>
 
 <section class="section-block" aria-labelledby="coverHeading">

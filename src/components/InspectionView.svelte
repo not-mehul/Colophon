@@ -1,6 +1,7 @@
 <script lang="ts">
   // Inspection: the verdict, the diagnostic ledger (seven checks), the
   // validation list with one-tap fixes, and the report card.
+  import { cheer } from '../lib/delight';
   import { tierOf, type Check } from '../epub/audit';
   import type { Issue } from '../epub/validate';
   import { settle } from '../lib/appear';
@@ -58,11 +59,22 @@
     }
     return out;
   }
+
+  // A perfect edition is worth a shower of sorts, once per edition per visit.
+  let dial = $state<HTMLElement>();
+  let cheered = '';
+  $effect(() => {
+    const key = `${bench.id}`;
+    if (bench.audit.score === 100 && bench.gain > 0 && cheered !== key) {
+      cheered = key;
+      cheer(dial, { count: 70 });
+    }
+  });
 </script>
 
 <section class="panel verdict-panel" aria-labelledby="verdictHeading" use:settle={`verdict:${bench.id}`}>
   <div class="verdict">
-    <ScoreDial score={bench.audit.score} size={112} stroke={6} labelled label="Score {bench.audit.score} of 100" />
+    <div class="dial-wrap" bind:this={dial}><ScoreDial score={bench.audit.score} size={112} stroke={6} labelled label="Score {bench.audit.score} of 100" /></div>
     <div class="verdict-text">
       <p class="eyebrow" style:color="var({tier.cssVar})">{tier.name}</p>
       <h2 class="t-verdict" id="verdictHeading">{tier.verdict}</h2>

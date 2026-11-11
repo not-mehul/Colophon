@@ -81,3 +81,35 @@ test('the proof lists each change and puts one back', async ({ page }) => {
   await expect(page.locator('.shape-bar')).not.toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('hides easter eggs, counts them once, and lists the count in Settings', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('No edition on the bench')).toBeVisible();
+  for (const key of ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']) {
+    await page.keyboard.press(key);
+  }
+  await expect(page.locator('.toast[data-kind="celebrate"]')).toHaveText("The printer's devil was here. Easter egg found: 1 of 4.");
+
+  for (let i = 0; i < 7; i++) await page.locator('.t-page-title').click();
+  await expect(page.locator('.toast[data-kind="celebrate"]')).toHaveText('Stet. Let it stand. Easter egg found: 2 of 4.');
+
+  await page.click('#openSettings');
+  await expect(page.locator('#eggCount')).toHaveText('Easter eggs: 2 of 4 found');
+});
+
+test('left alone, a composing stick sets pangrams; five is a full case', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  await expect(page.getByText('No edition on the bench')).toBeVisible();
+  await page.clock.runFor(41_000);
+  const dock = page.getByTestId('idle-dock');
+  await expect(dock).toBeVisible();
+  await expect(dock.locator('.idle-line')).toHaveText('Press the sort to set a line.');
+  const sort = dock.getByRole('button', { name: 'Set a line' });
+  await sort.click();
+  await expect(dock.locator('.idle-line .visually-hidden')).toHaveText('Sphinx of black quartz, judge my vow.');
+  for (let i = 1; i < 5; i++) await sort.click();
+  await expect(page.locator('.toast[data-kind="celebrate"]')).toHaveText('A full case: every letter set, five times over. Easter egg found: 1 of 4.');
+  await page.locator('.t-page-title').click();
+  await expect(dock).toHaveCount(0);
+});

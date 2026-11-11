@@ -1590,3 +1590,14 @@ body:has(.batch-bar) {
   color: var(--text-muted);
   white-space: nowrap;
 }
+
+/* ─── Delight (style.md §11.3) ───────────────────────────────── */
+
+/* The title word flips when marked stet (an easter egg). */
+.title-word {
+  display: inline-block;
+}
+.dial-wrap {
+  display: flex;
+  flex-shrink: 0;
+}

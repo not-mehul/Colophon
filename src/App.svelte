@@ -7,13 +7,16 @@
   import { sendToBookShelf } from './platform/handoff';
   import { shareText } from './platform/output';
   import { bench } from './state/bench.svelte';
+  import { library } from './state/library.svelte';
   import { settings } from './state/settings.svelte';
   import { ui, type Tab } from './state/ui.svelte';
   import CatalogView from './components/CatalogView.svelte';
   import ChaptersView from './components/ChaptersView.svelte';
   import ImprintView from './components/ImprintView.svelte';
   import InspectionView from './components/InspectionView.svelte';
+  import IdleStick from './components/IdleStick.svelte';
   import LibraryView from './components/LibraryView.svelte';
+  import IdleDock from './components/ui/IdleDock.svelte';
   import A11ySheet from './components/sheets/A11ySheet.svelte';
   import AltTextSheet from './components/sheets/AltTextSheet.svelte';
   import ChapterPreview from './components/sheets/ChapterPreview.svelte';
@@ -26,7 +29,8 @@
   import SettingsSheet from './components/sheets/SettingsSheet.svelte';
   import ConfirmModal from './components/ui/ConfirmModal.svelte';
   import Icon from './components/ui/Icon.svelte';
-  import { TabRail, ThemeToggle, Toast } from 'dusk-dawn';
+  import { TabRail, ThemeToggle, Toast, konami, play, secretTaps } from 'dusk-dawn';
+  import { cheer, hatch } from './lib/delight';
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'inspection', label: 'Inspection' },
@@ -96,6 +100,28 @@
     const line = creator ? `${title} by ${creator}` : title;
     if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
   }
+
+  // Easter eggs (style.md §11.3). The Konami code lets the printer's devil
+  // loose in the type case; seven taps on the title mark it stet.
+  let titleWord = $state<HTMLElement>();
+  $effect(() =>
+    konami(() => {
+      cheer(null, { count: 90, spread: 1.3 });
+      hatch('konami', "The printer's devil was here.");
+    }),
+  );
+  function stet() {
+    play(titleWord, 'flip');
+    hatch('title', 'Stet. Let it stand.');
+  }
+
+  // Binding is the press closing on the forme: the button gives a satisfied bounce when it worked.
+  async function bindNow(button: HTMLElement) {
+    const id = bench.id;
+    const before = id ? library.get(id)?.boundAt : undefined;
+    await bench.bindAndSave();
+    if (id && library.get(id)?.boundAt !== before) play(button, 'jelly');
+  }
 </script>
 
 <svelte:window onkeydown={keydown} ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
@@ -110,7 +136,7 @@
   <header class="site-header">
     <div class="site-title">
       <p class="eyebrow">Colophon · Edition inspector</p>
-      <h1 class="t-page-title">The <em>Colophon</em></h1>
+      <h1 class="t-page-title" use:secretTaps={{ count: 7, onunlock: stet }}>The <em class="title-word" bind:this={titleWord}>Colophon</em></h1>
       <p class="t-tagline">Audit, imprint, sequence and catalog an EPUB edition.</p>
     </div>
     <div class="header-tools">
@@ -132,7 +158,7 @@
       <div class="edition-bar-actions">
         <button type="button" class="btn-icon" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
         <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
-        <button type="button" class="btn btn-primary" id="bindEpub" disabled={bench.busy !== null} onclick={() => void bench.bindAndSave()}>
+        <button type="button" class="btn btn-primary" id="bindEpub" disabled={bench.busy !== null} onclick={(e) => void bindNow(e.currentTarget)}>
           <Icon name="book-check" />{bench.busy === 'binding' ? 'Binding…' : 'Bind'}
         </button>
       </div>
@@ -197,5 +223,7 @@
 {/if}
 
 <ConfirmModal />
+
+<IdleDock label="A composing stick" disabled={!!ui.overlay || bench.busy !== null}><IdleStick /></IdleDock>
 
 <Toast toast={ui.toast} onpause={() => ui.pauseToast()} onresume={() => ui.resumeToast()} onaction={() => ui.actOnToast()} />

@@ -2,7 +2,7 @@
 // the overlay stack that Android's back button unwinds.
 
 export type Tab = 'inspection' | 'imprint' | 'chapters' | 'catalog';
-export type ToastKind = 'success' | 'error' | 'info';
+export type ToastKind = 'success' | 'error' | 'info' | 'celebrate';
 
 export interface ToastAction {
   label: string;
