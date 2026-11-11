@@ -42,7 +42,7 @@
   {#if line}
     {#key set}
       <span class="visually-hidden">{line}</span>
-      <span class="set" aria-hidden="true">{#each words as word, w (w)}<span class="word">{#each word as { letter, i } (i)}<span class="letter" style:--i={i}>{letter}</span>{/each}</span>{' '}{/each}</span>
+      <span class="set" aria-hidden="true">{#each words as word, w (w)}<span class="word">{#each word as { letter, i } (i)}<span class="letter" style:--i={i}>{letter}</span>{/each}</span>{/each}</span>
     {/key}
   {:else}
     Press the sort to set a line.
@@ -63,6 +63,10 @@
   .word {
     display: inline-block;
     white-space: nowrap;
+  }
+  /* The word space, as a trailing margin, so lines still break between words and none starts indented. */
+  .word:not(:last-child) {
+    margin-right: 0.26em;
   }
   .letter {
     display: inline-block;
