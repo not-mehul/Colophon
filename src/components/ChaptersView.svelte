@@ -19,11 +19,11 @@
     <h2 class="t-section-heading" id="orderHeading">Reading <em>order</em></h2>
     <button type="button" class="btn btn-muted section-head-action" id="resetOrder" onclick={() => bench.resetChapters()}>Reset</button>
   </div>
-  <div class="chip-row">
-    <button type="button" class="chip" onclick={() => bench.sortChapters('title')}><Icon name="arrow-down-a-z" />By heading</button>
-    <button type="button" class="chip" onclick={() => bench.sortChapters('name')}><Icon name="file-text" />By file name</button>
-    <button type="button" class="chip" onclick={() => bench.sortChapters('reverse')}><Icon name="arrow-up-down" />Reverse</button>
-    <button type="button" class="chip" aria-expanded={numbering} onclick={() => (numbering = !numbering)}><Icon name="list-ordered" />Number files</button>
+  <div class="btn-row btn-row-start">
+    <button type="button" class="btn btn-muted" onclick={() => bench.sortChapters('title')}><Icon name="arrow-down-a-z" />By heading</button>
+    <button type="button" class="btn btn-muted" onclick={() => bench.sortChapters('name')}><Icon name="file-text" />By file name</button>
+    <button type="button" class="btn btn-muted" onclick={() => bench.sortChapters('reverse')}><Icon name="arrow-up-down" />Reverse</button>
+    <button type="button" class="btn btn-muted" aria-expanded={numbering} onclick={() => (numbering = !numbering)}><Icon name="list-ordered" />Number files</button>
   </div>
   {#if numbering}
     <div class="panel form-stack number-panel">

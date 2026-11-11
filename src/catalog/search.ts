@@ -2,6 +2,7 @@
 
 import type { Meta } from '../epub/types';
 import { cached, FRESH_MS, remember } from './cache';
+import { cleanIsbn, isIsbn } from './isbn';
 import { confidence, dedupe } from './match';
 import { searchSource } from './sources';
 import type { CatalogKeys, CatalogRecord, SourceId } from './types';
@@ -25,6 +26,12 @@ export function sourcesFor(scope: SearchScope, keys: CatalogKeys): SourceId[] {
   if (scope === 'all' && keys.isbndbApiKey) list.push('isbndb');
   if (keys.customCatalogUrl) list.push('custom');
   return list;
+}
+
+/** What to search for an edition: its ISBN when it has one, else title and first author. */
+export function defaultQuery(meta: Pick<Meta, 'identifier' | 'title' | 'creator'>): string {
+  if (meta.identifier && isIsbn(meta.identifier)) return cleanIsbn(meta.identifier);
+  return [meta.title, meta.creator.split(',')[0]?.trim()].filter(Boolean).join(' ');
 }
 
 export async function searchCatalogs(

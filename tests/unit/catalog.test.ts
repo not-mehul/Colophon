@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkIdentifier, cleanIsbn, isbnFromBarcode, isIsbn, isbn10to13 } from '../../src/catalog/isbn';
 import { confidence, largerCover } from '../../src/catalog/match';
-import { searchCatalogs, sourcesFor } from '../../src/catalog/search';
+import { defaultQuery, searchCatalogs, sourcesFor } from '../../src/catalog/search';
 import { parseGoogle, parseOpenLibrary, requestFor } from '../../src/catalog/sources';
 import { EMPTY_META } from '../../src/epub/types';
 import { db } from '../../src/state/db';
@@ -107,5 +107,14 @@ describe('the identifier hint', () => {
   it('leaves other identifiers be', () => {
     expect(checkIdentifier('urn:uuid:4f6c1d0e-8a1b-4b5e-9a39-2f6f4c1e0b77').kind).toBe('not-isbn');
     expect(checkIdentifier('  ').kind).toBe('empty');
+  });
+});
+
+describe('the default search', () => {
+  it('uses an ISBN when the edition has one, and title and author otherwise', () => {
+    expect(defaultQuery({ identifier: '978-0-441-17271-9', title: 'Dune', creator: 'Frank Herbert' })).toBe('9780441172719');
+    expect(defaultQuery({ identifier: 'urn:uuid:colophon-specimen-2026', title: 'The Art of Digital Bookmaking', creator: 'Clara Vance, Ada Lin' })).toBe(
+      'The Art of Digital Bookmaking Clara Vance',
+    );
   });
 });

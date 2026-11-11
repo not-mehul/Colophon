@@ -46,10 +46,8 @@
       {/each}
     </div>
     <figcaption class="t-data-small dim shape-caption">
-      <span class="tabular">{total.toLocaleString('en')} words</span>
-      {#if total}<span>· about {readingTime(readingMinutes(total))} to read</span>{/if}
-      {#if longest && flow.length > 2}<span class="ellipsis">· longest: {longest.title}</span>{/if}
-      {#if slight}<span class="amber">· {plural(slight, 'very short chapter')}</span>{/if}
+      <span><span class="tabular">{total.toLocaleString('en')} words</span>{#if total}{` · about ${readingTime(readingMinutes(total))} to read`}{/if}{#if slight}&nbsp;· <span class="amber">{plural(slight, 'very short chapter')}</span>{/if}</span>
+      {#if longest && flow.length > 2}<span class="ellipsis">Longest: {longest.title}</span>{/if}
     </figcaption>
   </figure>
 {/if}

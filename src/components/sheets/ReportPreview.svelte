@@ -53,7 +53,6 @@
   </div>
   {#snippet footer()}
     <div class="btn-row">
-      <button type="button" class="btn btn-muted" onclick={onclose}>Close</button>
       <button type="button" class="btn btn-primary" id="shareCard" disabled={!blob} onclick={() => void share()}><Icon name="share-2" />Share</button>
     </div>
   {/snippet}
