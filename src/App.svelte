@@ -7,13 +7,16 @@
   import { sendToBookShelf } from './platform/handoff';
   import { shareText } from './platform/output';
   import { bench } from './state/bench.svelte';
+  import { library } from './state/library.svelte';
   import { settings } from './state/settings.svelte';
   import { ui, type Tab } from './state/ui.svelte';
   import CatalogView from './components/CatalogView.svelte';
   import ChaptersView from './components/ChaptersView.svelte';
   import ImprintView from './components/ImprintView.svelte';
   import InspectionView from './components/InspectionView.svelte';
+  import IdleStick from './components/IdleStick.svelte';
   import LibraryView from './components/LibraryView.svelte';
+  import IdleDock from './components/ui/IdleDock.svelte';
   import A11ySheet from './components/sheets/A11ySheet.svelte';
   import AltTextSheet from './components/sheets/AltTextSheet.svelte';
   import ChapterPreview from './components/sheets/ChapterPreview.svelte';
@@ -111,6 +114,14 @@
     play(titleWord, 'flip');
     hatch('title', 'Stet. Let it stand.');
   }
+
+  // Binding is the press closing on the forme: the button gives a satisfied bounce when it worked.
+  async function bindNow(button: HTMLElement) {
+    const id = bench.id;
+    const before = id ? library.get(id)?.boundAt : undefined;
+    await bench.bindAndSave();
+    if (id && library.get(id)?.boundAt !== before) play(button, 'jelly');
+  }
 </script>
 
 <svelte:window onkeydown={keydown} ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
@@ -147,7 +158,7 @@
       <div class="edition-bar-actions">
         <button type="button" class="btn-icon" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
         <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
-        <button type="button" class="btn btn-primary" id="bindEpub" disabled={bench.busy !== null} onclick={() => void bench.bindAndSave()}>
+        <button type="button" class="btn btn-primary" id="bindEpub" disabled={bench.busy !== null} onclick={(e) => void bindNow(e.currentTarget)}>
           <Icon name="book-check" />{bench.busy === 'binding' ? 'Binding…' : 'Bind'}
         </button>
       </div>
@@ -212,5 +223,7 @@
 {/if}
 
 <ConfirmModal />
+
+<IdleDock label="A composing stick" disabled={!!ui.overlay || bench.busy !== null}><IdleStick /></IdleDock>
 
 <Toast toast={ui.toast} onpause={() => ui.pauseToast()} onresume={() => ui.resumeToast()} onaction={() => ui.actOnToast()} />

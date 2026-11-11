@@ -5,7 +5,7 @@
 import { celebrate, createEggs, type CelebrateOptions } from 'dusk-dawn/expressive';
 import { ui } from '../state/ui.svelte';
 
-export const EGGS = ['konami', 'title', 'lorem'] as const;
+export const EGGS = ['konami', 'title', 'lorem', 'stick'] as const;
 export type Egg = (typeof EGGS)[number];
 
 const eggs = createEggs('colophon', EGGS);
