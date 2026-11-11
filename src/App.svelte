@@ -26,7 +26,8 @@
   import SettingsSheet from './components/sheets/SettingsSheet.svelte';
   import ConfirmModal from './components/ui/ConfirmModal.svelte';
   import Icon from './components/ui/Icon.svelte';
-  import { TabRail, ThemeToggle, Toast } from 'dusk-dawn';
+  import { TabRail, ThemeToggle, Toast, konami, play, secretTaps } from 'dusk-dawn';
+  import { cheer, hatch } from './lib/delight';
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'inspection', label: 'Inspection' },
@@ -96,6 +97,20 @@
     const line = creator ? `${title} by ${creator}` : title;
     if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
   }
+
+  // Easter eggs (style.md §11.3). The Konami code lets the printer's devil
+  // loose in the type case; seven taps on the title mark it stet.
+  let titleWord = $state<HTMLElement>();
+  $effect(() =>
+    konami(() => {
+      cheer(null, { count: 90, spread: 1.3 });
+      hatch('konami', "The printer's devil was here.");
+    }),
+  );
+  function stet() {
+    play(titleWord, 'flip');
+    hatch('title', 'Stet. Let it stand.');
+  }
 </script>
 
 <svelte:window onkeydown={keydown} ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
@@ -110,7 +125,7 @@
   <header class="site-header">
     <div class="site-title">
       <p class="eyebrow">Colophon · Edition inspector</p>
-      <h1 class="t-page-title">The <em>Colophon</em></h1>
+      <h1 class="t-page-title" use:secretTaps={{ count: 7, onunlock: stet }}>The <em class="title-word" bind:this={titleWord}>Colophon</em></h1>
       <p class="t-tagline">Audit, imprint, sequence and catalog an EPUB edition.</p>
     </div>
     <div class="header-tools">

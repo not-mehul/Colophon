@@ -1,5 +1,6 @@
 <script lang="ts">
   // Settings, saved as they change. API keys go to secure storage.
+  import { EGGS, eggsFound } from '../../lib/delight';
   import { db } from '../../state/db';
   import { library } from '../../state/library.svelte';
   import { settings } from '../../state/settings.svelte';
@@ -107,6 +108,7 @@
   <section class="settings-group">
     <h3 class="t-section-label">About</h3>
     <p class="t-body-small dim">Colophon {__APP_VERSION__}. An edition inspector, imprint editor and bindery for EPUB files.</p>
+    <p class="t-body-small dim" id="eggCount">Easter eggs: {eggsFound()} of {EGGS.length} found</p>
     {#if !isNative}
       <span class="t-field-label">Keyboard</span>
       <dl class="keys">

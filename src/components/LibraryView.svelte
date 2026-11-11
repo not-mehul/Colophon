@@ -132,7 +132,7 @@
       <p class="empty-match">No edition matches “{query.trim()}”.</p>
       <div class="btn-row"><button type="button" class="btn btn-muted" onclick={() => (query = '')}>Clear filter</button></div>
     {/if}
-    <ul class="edition-list" aria-label="Recent editions">
+    <ul class="edition-list dd-stagger" aria-label="Recent editions">
       {#each shown as edition (edition.id)}
         <li>
           <EditionCard

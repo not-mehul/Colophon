@@ -53,7 +53,7 @@
 
 <button
   type="button"
-  class="edition-card"
+  class="edition-card dd-pressable dd-lift"
   class:selected
   aria-pressed={selecting ? selected : undefined}
   aria-label="{edition.title || edition.fileName}{edition.creator ? `, ${edition.creator}` : ''}. Score {edition.score}, {tier.name}."

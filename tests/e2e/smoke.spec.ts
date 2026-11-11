@@ -81,3 +81,18 @@ test('the proof lists each change and puts one back', async ({ page }) => {
   await expect(page.locator('.shape-bar')).not.toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test('hides easter eggs, counts them once, and lists the count in Settings', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('No edition on the bench')).toBeVisible();
+  for (const key of ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']) {
+    await page.keyboard.press(key);
+  }
+  await expect(page.locator('.toast[data-kind="celebrate"]')).toHaveText("The printer's devil was here. Easter egg found: 1 of 3.");
+
+  for (let i = 0; i < 7; i++) await page.locator('.t-page-title').click();
+  await expect(page.locator('.toast[data-kind="celebrate"]')).toHaveText('Stet. Let it stand. Easter egg found: 2 of 3.');
+
+  await page.click('#openSettings');
+  await expect(page.locator('#eggCount')).toHaveText('Easter eggs: 2 of 3 found');
+});
