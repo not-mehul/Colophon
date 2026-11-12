@@ -51,21 +51,19 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-`.github/workflows/release.yml` runs the checks, builds the page and the release
-APK around it, signs it, uploads it as a build artifact, and opens a **draft**
-GitHub release with the APK attached. Write the notes and press publish.
+`.github/workflows/release.yml` builds the page and the signed release APK around
+it, and opens a **draft** GitHub release with the APK attached. Write the notes and
+press publish. It runs no tests (the build's type check is the only gate), so run
+`npm run check` yourself before tagging when a change deserves it.
 
 You can also start on GitHub instead: **Releases → Draft a new release**, type a
 new `vX.Y.Z` tag under *Choose a tag*, write the notes, and press **Publish
 release**. Publishing creates the tag and runs the same workflow, which adds the
 APK to that release a few minutes later and leaves your notes alone. Saving it as
-a draft starts nothing (GitHub runs no workflows for drafts), so publish it. If the
-signing secrets are missing, the run fails rather than attach an unsigned APK to a
-published release.
+a draft starts nothing (GitHub runs no workflows for drafts), so publish it.
 
-If any of the four secrets is missing, the workflow still finishes. It warns,
-naming the missing ones, and names the file `colophon-<version>-unsigned.apk` so an
-unsigned build cannot be mistaken for one you can install.
+If the signing secrets are missing or wrong, the run fails: there is no unsigned
+build to download by mistake.
 
 ---
 
@@ -98,5 +96,4 @@ Both come from the tag; there is nothing in the source to bump.
   It is major × 10 000 + minor × 100 + patch, so `1.2.3` is `10203`, which keeps
   rising while minor and patch stay under 100.
 
-Tags must be `vMAJOR.MINOR.PATCH`. Anything else, and any build without a tag,
-builds as `0.0.0` with a warning. A local build without `-PcolophonVersion` is `3.0.0`, the last version shipped by hand.
+Tags must be `vMAJOR.MINOR.PATCH`. A local build without `-PcolophonVersion` is `3.0.0`, the last version shipped by hand.

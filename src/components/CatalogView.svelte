@@ -5,7 +5,7 @@
   import { fetchCover } from '../catalog/cover';
   import { recentQueries } from '../catalog/cache';
   import { formatIsbn, isbnFromBarcode } from '../catalog/isbn';
-  import { searchCatalogs, type ScoredRecord, type SearchScope } from '../catalog/search';
+  import { defaultQuery, searchCatalogs, type ScoredRecord, type SearchScope } from '../catalog/search';
   import { SOURCE_NAMES } from '../catalog/types';
   import type { Meta } from '../epub/types';
   import { relativeDay } from '../lib/format';
@@ -17,7 +17,7 @@
   import Notice from './ui/Notice.svelte';
 
   const meta = $derived(bench.draft.meta);
-  let query = $state(bench.draft.meta.identifier || [bench.draft.meta.title, bench.draft.meta.creator.split(',')[0]].filter(Boolean).join(' '));
+  let query = $state(defaultQuery(bench.draft.meta));
   let scope = $state<SearchScope>('all');
   let results = $state.raw<ScoredRecord[]>([]);
   let searching = $state(false);
@@ -149,7 +149,7 @@
     {#if canScanBarcodes()}
       <button type="button" class="btn-icon" id="scanIsbn" aria-label="Scan an ISBN barcode" onclick={() => void scan()}><Icon name="scan-barcode" /></button>
     {/if}
-    <button type="submit" class="btn btn-primary" id="catalogSearch" disabled={searching || !query.trim()}>{searching ? 'Searching…' : 'Search'}</button>
+    <button type="submit" class="btn btn-secondary" id="catalogSearch" disabled={searching || !query.trim()}>{searching ? 'Searching…' : 'Search'}</button>
   </form>
   <div class="segmented" role="radiogroup" aria-label="Catalogs">
     {#each SCOPES as s (s.id)}<button type="button" role="radio" aria-checked={scope === s.id} onclick={() => (scope = s.id)}>{s.label}</button>{/each}
@@ -161,7 +161,11 @@
     <Notice icon="history" title="Saved results from {relativeDay(cachedAt)}" detail="A catalog didn't answer, so these come from the last search for the same words." />
   {/if}
   {#if failed.length}
-    <Notice kind="error" title="{failed.join(' and ')} didn't answer" detail={online ? 'Try again in a moment.' : 'Reconnect, then search again.'} />
+    {#if results.length}
+      <Notice title="{failed.join(' and ')} didn't answer" detail="These results are from the other catalogs." />
+    {:else}
+      <Notice kind="error" title="{failed.join(' and ')} didn't answer" detail={online ? 'Try again in a moment.' : 'Reconnect, then search again.'} />
+    {/if}
   {/if}
 
   {#if recent.length && !searched}

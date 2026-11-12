@@ -5,6 +5,8 @@
   import { tierOf, type Check } from '../epub/audit';
   import type { Issue } from '../epub/validate';
   import { settle } from '../lib/appear';
+  import { sendToBookShelf } from '../platform/handoff';
+  import { shareText } from '../platform/output';
   import { fileSize, plural, readingMinutes, readingTime } from '../lib/format';
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
@@ -24,6 +26,14 @@
   const before = $derived(new Map(bench.baseline.checks.map((c) => [c.id, c.score])));
   const next = $derived(bench.nextGain);
   const minutes = $derived(readingMinutes(edition.totalWords));
+
+  async function toBookShelf() {
+    const { title, creator, identifier } = bench.draft.meta;
+    // BookShelf's own link first (style.md §14.1); the share sheet when it isn't installed.
+    if (await sendToBookShelf({ title, creator, isbn: identifier })) return;
+    const line = creator ? `${title} by ${creator}` : title;
+    if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
+  }
 
   /** Brings a ledger row into view and puts focus on it, for "Most to gain". */
   function showCheck(id: string) {
@@ -95,14 +105,16 @@
     <div class="stat-tile"><span class="t-stat tabular">{fileSize(edition.fileSize)}</span><span class="t-field-label">EPUB {edition.version}</span></div>
   </div>
   <div class="btn-row btn-row-start">
-    <button type="button" class="btn btn-secondary" id="shareReport" onclick={() => ui.open('report')}><Icon name="share-2" />Report card</button>
+    <button type="button" class="btn btn-secondary" id="shareReport" onclick={() => ui.open('report')}><Icon name="file-chart-column" />Report card</button>
+    <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
+    <button type="button" class="btn-icon" id="sendBookShelf" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
     {#if next}
       <button type="button" class="chip next-gain" id="nextGain" onclick={() => showCheck(next.id)}>
         <Icon name="target" />Most to gain: {next.title}, {plural(next.max - next.score, 'point')}
       </button>
     {/if}
     {#if bench.changes}
-      <button type="button" class="chip" id="openProof" aria-haspopup="dialog" onclick={() => ui.open('proof')}><Icon name="file-diff" />Review {plural(bench.changes, 'change')}</button>
+      <button type="button" class="btn btn-muted" id="openProof" aria-haspopup="dialog" onclick={() => ui.open('proof')}><Icon name="file-diff" />Review {plural(bench.changes, 'change')}</button>
     {/if}
   </div>
 </section>
@@ -130,13 +142,13 @@
           {/each}
         </ul>
         {#if fixes.length || check.action}
-          <div class="chip-row">
+          <div class="btn-row btn-row-start ledger-actions">
             {#each fixes as fix (fix.label)}
-              <button type="button" class="chip" onclick={fix.run}><Icon name={fix.icon} />{fix.label}</button>
+              <button type="button" class="btn btn-secondary" onclick={fix.run}><Icon name={fix.icon} />{fix.label}</button>
             {/each}
             {#if check.action}
               {@const action = check.action}
-              <button type="button" class="chip" onclick={() => ui.go(action.tab)}>{action.label}<Icon name="chevron-right" /></button>
+              <button type="button" class="btn btn-muted" onclick={() => ui.go(action.tab)}>{action.label}<Icon name="chevron-right" /></button>
             {/if}
           </div>
         {/if}

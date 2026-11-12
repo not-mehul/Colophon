@@ -108,10 +108,9 @@
         {#if summary.unsaved}<span>· <span class="amber">{summary.unsaved} with unsaved edits</span></span>{/if}
       </p>
     {/if}
-    <div class="btn-row btn-row-start">
-      <button type="button" class="btn btn-primary" id="openEpub" onclick={() => void openFile()}><Icon name="folder-open" />Open EPUB</button>
+    <div class="btn-row">
       <button type="button" class="btn btn-secondary" id="newEdition" onclick={() => ui.open('builder')}><Icon name="feather" />New edition</button>
-      <button type="button" class="btn btn-muted" onclick={() => void openSample()}>Sample</button>
+      <button type="button" class="btn btn-primary" id="openEpub" onclick={() => void openFile()}><Icon name="folder-open" />Open EPUB</button>
     </div>
     {#if library.items.length > 1}
       <div class="bench-tools">
@@ -127,6 +126,7 @@
     {/if}
     <p class="field-hint bench-hint">
       {sort === 'score' ? 'Weakest first, so the next one to mend is at the top. ' : ''}Long-press an edition to select several for batch fixes.
+      <button type="button" class="link-inline" id="openSample" onclick={() => void openSample()}>Open the sample</button> to practise on.
     </p>
     {#if !shown.length}
       <p class="empty-match">No edition matches “{query.trim()}”.</p>

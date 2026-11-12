@@ -121,7 +121,7 @@
         {#if was !== i && dragging === null}<span class="sig-was"><span class="visually-hidden">was </span>{String(was + 1).padStart(2, '0')}</span>{/if}
       </span>
       <div class="sig-main">
-        <p class="sig-title ellipsis">{bench.titles.get(chapter.id) || 'Untitled'}{#if !chapter.linear}<span class="chip-status">Outside the flow</span>{/if}</p>
+        <p class="sig-title"><span class="ellipsis">{bench.titles.get(chapter.id) || 'Untitled'}</span>{#if !chapter.linear}<span class="chip-status">Outside the flow</span>{/if}</p>
         {#if editing === i}
           <!-- svelte-ignore a11y_autofocus -->
           <input

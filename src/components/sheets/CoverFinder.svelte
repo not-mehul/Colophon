@@ -1,7 +1,7 @@
 <script lang="ts">
   // Find a cover online: the catalogs' covers for the imprint's ISBN or title.
   import { fetchCover } from '../../catalog/cover';
-  import { searchCatalogs, type ScoredRecord } from '../../catalog/search';
+  import { defaultQuery, searchCatalogs, type ScoredRecord } from '../../catalog/search';
   import { SOURCE_NAMES } from '../../catalog/types';
   import type { Meta } from '../../epub/types';
   import { bench } from '../../state/bench.svelte';
@@ -11,7 +11,7 @@
 
   let { onclose, onpick }: { onclose: () => void; onpick: () => void } = $props();
   const meta = $state.snapshot(bench.draft.meta) as Meta;
-  let query = $state(meta.identifier || [meta.title, meta.creator.split(',')[0]].filter(Boolean).join(' '));
+  let query = $state(defaultQuery(meta));
   let results = $state.raw<ScoredRecord[]>([]);
   let loading = $state(false);
   let fetching = $state<string | null>(null);

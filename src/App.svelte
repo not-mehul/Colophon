@@ -4,8 +4,6 @@
   import { applyTheme, shown, toggledTheme } from './platform/theme.svelte';
   import { EPUB_ACCEPT, fileBytes, pickFile } from './lib/pick';
   import { shortcut } from './lib/keys';
-  import { sendToBookShelf } from './platform/handoff';
-  import { shareText } from './platform/output';
   import { bench } from './state/bench.svelte';
   import { library } from './state/library.svelte';
   import { settings } from './state/settings.svelte';
@@ -47,6 +45,8 @@
     })),
   );
   const tier = $derived(tierOf(bench.audit.score));
+  // The eyebrow is the date, as in the other apps (style.md §8.8).
+  const today = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
   let dropping = $state(false);
 
   $effect(() => applyTheme(settings.value.theme));
@@ -93,14 +93,6 @@
     else ui.go(action.tab);
   }
 
-  async function toBookShelf() {
-    const { title, creator, identifier } = bench.draft.meta;
-    // BookShelf's own link first (style.md §14.1); the share sheet when it isn't installed.
-    if (await sendToBookShelf({ title, creator, isbn: identifier })) return;
-    const line = creator ? `${title} by ${creator}` : title;
-    if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
-  }
-
   // Easter eggs (style.md §11.3). The Konami code lets the printer's devil
   // loose in the type case; seven taps on the title mark it stet.
   let titleWord = $state<HTMLElement>();
@@ -135,7 +127,7 @@
 <div class="container">
   <header class="site-header">
     <div class="site-title">
-      <p class="eyebrow">Colophon · Edition inspector</p>
+      <p class="eyebrow">{today}</p>
       <h1 class="t-page-title" use:secretTaps={{ count: 7, onunlock: stet }}>The <em class="title-word" bind:this={titleWord}>Colophon</em></h1>
       <p class="t-tagline">Audit, imprint, sequence and catalog an EPUB edition.</p>
     </div>
@@ -148,20 +140,14 @@
   {#if bench.edition}
     <div class="file-bar edition-bar">
       <button type="button" class="btn-icon" id="backToBench" aria-label="Back to the bench" onclick={() => bench.close()}><Icon name="arrow-left" /></button>
-      <div class="edition-bar-text">
-        <h2 class="t-card-title ellipsis" id="barTitle">{bench.draft.meta.title || 'Untitled edition'}</h2>
-        <p class="t-data-small dim ellipsis">
-          <span style:color="var({tier.cssVar})">{bench.audit.score} · {tier.name}</span>
-          {#if bench.changes}· <button type="button" class="link-inline amber" id="changeCount" aria-haspopup="dialog" onclick={() => ui.open('proof')}>{plural(bench.changes, 'change')} to bind</button>{:else}· {bench.edition.fileName}{/if}
-        </p>
-      </div>
-      <div class="edition-bar-actions">
-        <button type="button" class="btn-icon" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
-        <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
-        <button type="button" class="btn btn-primary" id="bindEpub" disabled={bench.busy !== null} onclick={(e) => void bindNow(e.currentTarget)}>
-          <Icon name="book-check" />{bench.busy === 'binding' ? 'Binding…' : 'Bind'}
-        </button>
-      </div>
+      <h2 class="t-card-title ellipsis edition-bar-title" id="barTitle">{bench.draft.meta.title || 'Untitled edition'}</h2>
+      <p class="t-data-small dim ellipsis edition-bar-meta">
+        <span style:color="var({tier.cssVar})">{bench.audit.score} · {tier.name}</span>
+        {#if bench.changes}· <button type="button" class="link-inline amber" id="changeCount" aria-haspopup="dialog" onclick={() => ui.open('proof')}>{plural(bench.changes, 'change')} to bind</button>{:else}· {bench.edition.fileName}{/if}
+      </p>
+      <button type="button" class="btn btn-primary edition-bar-bind" id="bindEpub" disabled={bench.busy !== null} onclick={(e) => void bindNow(e.currentTarget)}>
+        <Icon name="book-check" />{bench.busy === 'binding' ? 'Binding…' : 'Bind'}
+      </button>
     </div>
 
     <nav class="app-tabs" aria-label="Edition">
