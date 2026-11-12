@@ -110,11 +110,10 @@ ol {
 
 /* ─── Header and the edition bar ─────────────────────────────── */
 
+/* The tools sit on the eyebrow's line, so the title and tagline below them
+   have the page's full width instead of a column beside the tools. */
 .site-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
+  position: relative;
   margin-bottom: var(--space-7);
 }
 .site-title {
@@ -123,7 +122,16 @@ ol {
   gap: var(--space-3);
   min-width: 0;
 }
+.site-title .eyebrow {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding-right: 8rem;
+}
 .header-tools {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -208,6 +216,20 @@ ol {
 }
 .btn-row-start > .btn {
   flex: 0 0 auto;
+}
+/* Buttons that each take the full width, one under the other. */
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* A segmented control that is given the full width shares it out evenly,
+   rather than bunching its options at the left. */
+.segmented {
+  display: flex;
+}
+.segmented > button {
+  flex: 1 1 0;
 }
 .form-stack {
   display: flex;

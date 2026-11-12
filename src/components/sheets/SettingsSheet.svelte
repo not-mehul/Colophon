@@ -99,7 +99,7 @@
   <section class="settings-group">
     <h3 class="t-section-label">Your data</h3>
     <p class="t-body-small dim">Editions stay on this device. Nothing is uploaded; catalogs see only what you search for.</p>
-    <div class="btn-row btn-row-start">
+    <div class="btn-stack">
       <button type="button" class="btn btn-secondary" onclick={() => void clearCache()}>Clear saved searches</button>
       <button type="button" class="btn btn-danger" disabled={!library.items.length} onclick={() => void clearLibrary()}>Clear the bench</button>
     </div>
