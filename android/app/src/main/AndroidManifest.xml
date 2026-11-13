@@ -83,5 +83,11 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="mise" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="nookling" />
+        </intent>
+        <!-- "Read in Rosetta" hands the bound EPUB to Rosetta by package. -->
+        <package android:name="io.github.notmehul.rosetta" />
     </queries>
 </manifest>

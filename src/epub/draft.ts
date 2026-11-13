@@ -32,6 +32,7 @@ export function cloneDraft(draft: Draft): Draft {
     removed: [...draft.removed],
     droppedItems: [...draft.droppedItems],
     patched: { ...draft.patched },
+    images: { ...draft.images },
     a11y: draft.a11y && {
       ...draft.a11y,
       accessModes: [...draft.a11y.accessModes],
@@ -74,6 +75,7 @@ export function changeCount(edition: Edition, draft: Draft): number {
   if (draft.removed.length) n++;
   if (draft.droppedItems.length) n++;
   n += Object.keys(draft.patched).length;
+  if (Object.keys(draft.images ?? {}).length) n++;
   if (draft.a11y) n++;
   return n;
 }

@@ -71,6 +71,7 @@ export function bind(edition: Edition, draft: Draft, options: BindOptions = {}):
   for (const path of draft.removed) files.delete(path);
   if (options.purgeOrphans) for (const path of edition.orphans) files.delete(path);
   for (const [path, value] of Object.entries(draft.patched)) files.set(path, bytes(value));
+  for (const [path, value] of Object.entries(draft.images ?? {})) if (files.has(path)) files.set(path, value);
 
   const doc = parseXml(edition.opfXml);
   const opfDir = edition.opfDir;

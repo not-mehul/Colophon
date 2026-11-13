@@ -26,11 +26,13 @@ Colophon is an edition inspector, imprint editor and bindery for EPUB files. Ope
 - **Imprint.** Title, authors, ISBN, publisher, language, series, subjects and synopsis, with the date picked on a calendar. The ISBN's check digit is checked as you type, with the corrected or ISBN-13 form offered.
 - **Covers.** Choose one, find one online, compose a typographic plate (Classic, Minimal, Noir or E-ink), and crop to 1600 × 2400.
 - **Chapters.** The shape of the book, one bar per chapter as tall as it is long, with reading time and any suspiciously short chapters. Drag to reorder, rename or number the files, preview a chapter, edit the table of contents (written to both the nav and the NCX), and set the bound file's name from a template.
+- **Find and replace** across every chapter, with each match shown in context first. Only the text you read changes; markup, links and styles are left alone. Match case and whole words, with Undo.
+- **Oversized images.** Pictures far bigger than any screen (over 2000 px or 1 MB) are listed under Inspection, and one tap shrinks them to 1600 px in the same format, so the book opens and sends faster.
 - **Catalog.** Look up Google Books, Open Library, ISBNdb or a custom catalog by title or by an ISBN typed or scanned with the camera. Results are kept, so earlier searches work offline. Import fields one by one, and undo any import.
 - **New edition.** A four-step builder that sets a Markdown or text manuscript as an EPUB 3 with a nav, an NCX and accessibility metadata.
 - **The proof.** Before binding, every change is listed with the old value struck through over the new one, grouped like the tabs. Put back any single change, or all of them.
 - **Bind.** Edits are saved as you make them, so an edition reopens where you left it. Binding writes a clean copy (`Documents/Colophon/` in the apps, a download in the browser).
-- **Open with Colophon.** Open an EPUB from any app on Android or iOS, and *Send to BookShelf* logs the book there in one tap.
+- **Open with Colophon.** Open an EPUB from any app on Android or iOS, and *Send to BookShelf* logs the book there in one tap. On Android, *Read in Rosetta* hands the edition to Rosetta as a file, ready to read.
 - **Keyboard shortcuts** in the browser: Ctrl/⌘ S binds, Ctrl/⌘ O opens, Ctrl/⌘ Z undoes, 1–4 switch tabs and P opens the proof.
 - **A little delight.** A shower of printer’s sorts when your edits bring an edition to 100, an idle composing stick to play with, and four easter eggs, counted in Settings. All of it respects reduced motion.
 

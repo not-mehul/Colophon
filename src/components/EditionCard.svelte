@@ -1,7 +1,7 @@
 <script lang="ts">
   // One edition on the library bench: cover, title, author, score.
   // A tap opens it; a long press starts selecting (style.md §14).
-  import { tierOf } from '../epub/audit';
+  import { tierOf, tierText } from '../epub/audit';
   import { fileSize, relativeDay } from '../lib/format';
   import { select } from '../platform/haptics';
   import type { StoredEdition } from '../state/db';
@@ -80,7 +80,7 @@
         · <span class="amber">unsaved edits</span>{/if}
     </span>
   </span>
-  <span class="edition-score" style:color="var({tier.cssVar})">
+  <span class="edition-score" style:color={tierText(tier)}>
     <ScoreDial score={edition.score} size={48} stroke={7} />
     <span class="edition-score-num tabular">{edition.score}</span>
   </span>

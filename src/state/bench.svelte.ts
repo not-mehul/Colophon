@@ -9,6 +9,10 @@ import { describeChanges } from '../epub/changes';
 import { bind } from '../epub/bind';
 import { changeCount, cloneDraft, effectiveCover, effectiveToc, newDraft, remainingOrphans } from '../epub/draft';
 import { formatFileName, numberChapters } from '../epub/filename';
+import { replaceInChapters, type FindOptions } from '../epub/find-replace';
+import { oversizedImages } from '../epub/images';
+import { shrinkImage } from '../render/shrink';
+import { openInRosetta } from '../platform/handoff';
 import { imageMime, imageSize } from '../epub/image-size';
 import { openEpub } from '../epub/open';
 import { tocFromChapters } from '../epub/toc';
@@ -70,6 +74,9 @@ class BenchState {
   cover = $derived(this.edition ? effectiveCover(this.edition, this.draft) : null);
   toc: TocEntry[] = $derived(this.edition ? effectiveToc(this.edition, this.draft) : []);
   orphans = $derived(this.edition ? remainingOrphans(this.edition, this.draft) : []);
+  /** Pictures far bigger than a screen needs (src/epub/images.ts). */
+  oversized = $derived(this.edition ? oversizedImages(this.edition, this.draft) : []);
+  shrinking = $state(false);
   /** Chapter titles by manifest id. */
   titles = $derived(new Map((this.edition?.chapters ?? []).map((c) => [c.id, c.title])));
 
@@ -138,6 +145,7 @@ class BenchState {
   private show(id: string, edition: Edition, draft: Draft): void {
     this.flush();
     this.lastTier = -1;
+    this.lastBound = null;
     this.edition = edition;
     this.draft = draft;
     this.id = id;
@@ -148,6 +156,7 @@ class BenchState {
   close(): void {
     this.flush();
     this.edition = null;
+    this.lastBound = null;
     this.id = null;
     this.draft = emptyDraft();
     void settings.update({ lastEditionId: null });
@@ -331,6 +340,55 @@ class BenchState {
     });
   }
 
+  // ---------- find and replace ----------
+
+  /** Replaces in the text of every chapter (or the chapters in `paths`), with Undo. */
+  replaceAll(query: string, replacement: string, options: FindOptions, paths?: ReadonlySet<string>): number {
+    const edition = this.edition;
+    if (!edition || !query) return 0;
+    let count = 0;
+    this.withUndo(
+      () => `Replaced ${plural(count, 'match', 'matches')} of “${query}”.`,
+      () => {
+        count = replaceInChapters(edition, this.draft, query, replacement, options, paths);
+      },
+    );
+    return count;
+  }
+
+  // ---------- images ----------
+
+  /** Shrinks every oversized picture to 1600 px on its longest side, with Undo. */
+  async shrinkImages(): Promise<void> {
+    const edition = this.edition;
+    const list = this.oversized;
+    if (!edition || !list.length || this.shrinking) return;
+    this.shrinking = true;
+    const smaller: Record<string, Uint8Array> = {};
+    let saved = 0;
+    try {
+      for (const image of list) {
+        const bytes = edition.files.get(image.path);
+        if (!bytes) continue;
+        const out = await shrinkImage(bytes, image.mediaType).catch(() => null);
+        if (out) {
+          smaller[image.path] = out;
+          saved += bytes.byteLength - out.byteLength;
+        }
+      }
+    } finally {
+      this.shrinking = false;
+    }
+    const count = Object.keys(smaller).length;
+    if (!count) {
+      ui.notify("Those images couldn't be made any smaller.", 'error');
+      return;
+    }
+    this.withUndo(`Shrank ${plural(count, 'image')}, saving ${(saved / 1e6).toFixed(1)} MB.`, () => {
+      this.draft.images = { ...this.draft.images, ...smaller };
+    });
+  }
+
   // ---------- inspection fixes ----------
 
   removeOrphans(): void {
@@ -433,12 +491,29 @@ class BenchState {
       );
       this.edition = reopened;
       this.draft = draft;
+      this.lastBound = { name, bytes };
       ui.notify(`Bound and saved to ${saved.label.replace(/\/[^/]*$/, '')}.`, 'success', saved.uri ? { label: 'Share', run: () => void this.share() } : undefined);
     } catch (err) {
       ui.notify(`Couldn't bind the EPUB (${err instanceof Error ? err.message : String(err)}). Your edits are still here; try again.`, 'error');
     } finally {
       this.busy = null;
     }
+  }
+
+  /** The file just bound, for "Read in Rosetta". */
+  lastBound = $state.raw<{ name: string; bytes: Uint8Array } | null>(null);
+
+  /** Opens the bound edition in Rosetta, passed as a file (Open with). */
+  async readInRosetta(): Promise<void> {
+    const edition = this.edition;
+    if (!edition) return;
+    const bytes =
+      this.lastBound && !this.changes
+        ? this.lastBound.bytes
+        : bind(edition, $state.snapshot(this.draft) as Draft, { level: settings.value.compression, dualCoverTags: settings.value.dualCoverTags, purgeOrphans: settings.value.purgeOrphans });
+    const opened = await openInRosetta(this.exportName, bytes);
+    if (opened === 'missing') ui.notify('Rosetta isn’t installed. Share the EPUB to open it in another reader.', 'error', { label: 'Share', run: () => void this.share() });
+    else if (opened === 'failed') ui.notify('Couldn’t open Rosetta. Try sharing the EPUB instead.', 'error');
   }
 
   /** Shares the edition as it stands: bound with the current edits. */

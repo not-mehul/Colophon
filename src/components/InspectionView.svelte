@@ -2,11 +2,12 @@
   // Inspection: the verdict, the diagnostic ledger (seven checks), the
   // validation list with one-tap fixes, and the report card.
   import { cheer } from '../lib/delight';
-  import { tierOf, type Check } from '../epub/audit';
+  import { tierOf, tierText, type Check } from '../epub/audit';
   import type { Issue } from '../epub/validate';
   import { settle } from '../lib/appear';
   import { sendToBookShelf } from '../platform/handoff';
   import { shareText } from '../platform/output';
+  import { isNative } from '../platform/native';
   import { fileSize, plural, readingMinutes, readingTime } from '../lib/format';
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
@@ -86,7 +87,7 @@
   <div class="verdict">
     <div class="dial-wrap" bind:this={dial}><ScoreDial score={bench.audit.score} size={112} stroke={6} labelled label="Score {bench.audit.score} of 100" /></div>
     <div class="verdict-text">
-      <p class="eyebrow" style:color="var({tier.cssVar})">{tier.name}</p>
+      <p class="eyebrow" style:color={tierText(tier)}>{tier.name}</p>
       <h2 class="t-verdict" id="verdictHeading">{tier.verdict}</h2>
       <p class="t-body-small dim">{tier.hint}</p>
       {#if bench.gain !== 0}
@@ -108,6 +109,9 @@
     <button type="button" class="btn btn-secondary" id="shareReport" onclick={() => ui.open('report')}><Icon name="file-chart-column" />Report card</button>
     <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
     <button type="button" class="btn-icon" id="sendBookShelf" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
+    {#if isNative}
+      <button type="button" class="btn-icon" id="readRosetta" aria-label="Read in Rosetta" onclick={() => void bench.readInRosetta()}><Icon name="book-open" /></button>
+    {/if}
     {#if next}
       <button type="button" class="chip next-gain" id="nextGain" onclick={() => showCheck(next.id)}>
         <Icon name="target" />Most to gain: {next.title}, {plural(next.max - next.score, 'point')}
@@ -190,6 +194,37 @@
     </ul>
   {/if}
 </section>
+
+{#if bench.oversized.length || Object.keys(bench.draft.images ?? {}).length}
+  <section class="section-block" aria-labelledby="imagesHeading">
+    <div class="section-head">
+      <h2 class="t-section-heading" id="imagesHeading">Oversized <em>images</em></h2>
+      {#if bench.oversized.length}
+        <button type="button" class="btn btn-secondary section-head-action" id="shrinkImages" disabled={bench.shrinking} onclick={() => void bench.shrinkImages()}>
+          <Icon name="image" />{bench.shrinking ? 'Shrinking…' : `Shrink ${bench.oversized.length}`}
+        </button>
+      {/if}
+    </div>
+    {#if bench.oversized.length}
+      <p class="field-hint">
+        Bigger than any screen needs, so the book is slow to open and to send. Shrinking draws each one at 1600 px on its longest side, in the same format; the cover is left alone.
+      </p>
+      <ul class="panel issue-list" aria-label="Oversized images">
+        {#each bench.oversized as image (image.path)}
+          <li class="issue-row is-warn">
+            <Icon name="image" />
+            <div class="issue-text">
+              <p class="issue-title">{image.width} × {image.height} px · {fileSize(image.size)}</p>
+              <p class="t-data-small faint ellipsis">{image.path}</p>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    {:else}
+      <Notice kind="success" title="Images shrunk" detail="Every picture in the text is a sensible size now. Review the changes to put them back." />
+    {/if}
+  </section>
+{/if}
 
 {#if settings.value.purgeOrphans && edition.orphans.length}
   <p class="field-hint">Orphan files are left out when you bind (Settings).</p>
