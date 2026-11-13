@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Select } from 'dusk-dawn';
   // The table of contents, written to both the EPUB 3 nav and the EPUB 2 NCX
   // when binding. Labels, depth, order; entries point at chapters.
   import { splitFragment } from '../epub/paths';
@@ -73,9 +74,10 @@
   </ol>
 {/if}
 <div class="toc-add">
-  <select class="select" bind:value={adding} aria-label="Add an entry for a chapter">
-    <option value="">Add an entry for…</option>
-    {#each bench.draft.chapters as c (c.id)}<option value={c.path}>{bench.titles.get(c.id)}</option>{/each}
-  </select>
+  <Select
+    label="Add an entry for a chapter"
+    bind:value={adding}
+    options={[{ value: '', label: 'Add an entry for…' }, ...bench.draft.chapters.map((c) => ({ value: c.path, label: bench.titles.get(c.id) ?? c.path }))]}
+  />
   <button type="button" class="btn btn-secondary" disabled={!adding} onclick={add}>Add</button>
 </div>
