@@ -3,6 +3,7 @@
 
 import { App as CapacitorApp } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { dismissOverlay } from 'dusk-dawn';
 import { mount } from 'svelte';
 import App from './App.svelte';
 import { listenForFiles } from './platform/intake';
@@ -33,6 +34,7 @@ async function start(): Promise<void> {
   if (isNative) {
     // Android back: overlays, then Inspection, then the library, then exit.
     void CapacitorApp.addListener('backButton', () => {
+      if (dismissOverlay()) return;
       if (!ui.back()) void CapacitorApp.exitApp();
     });
     void CapacitorApp.addListener('pause', () => bench.flush());

@@ -496,37 +496,6 @@ body:has(.batch-bar) {
   background: var(--on-accent);
 }
 
-/* A custom checkbox: 18px, amber when checked. */
-.check {
-  appearance: none;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin: 2px 0 0;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  background: var(--input-bg);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.check:checked {
-  background: var(--accent-bright);
-  border-color: var(--accent-bright);
-}
-.check:checked::after {
-  content: '';
-  width: 9px;
-  height: 5px;
-  border: 2px solid var(--on-accent);
-  border-top: 0;
-  border-right: 0;
-  transform: translateY(-1px) rotate(-45deg);
-}
-.check:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
 .check-label {
   display: inline-flex;
   align-items: center;
@@ -1216,10 +1185,6 @@ body:has(.batch-bar) {
   background:
     linear-gradient(to right, transparent calc(33.33% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(33.33% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(33.33% + 0.5px), transparent calc(33.33% + 0.5px), transparent calc(66.66% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(66.66% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(66.66% + 0.5px), transparent calc(66.66% + 0.5px)),
     linear-gradient(to bottom, transparent calc(33.33% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(33.33% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(33.33% + 0.5px), transparent calc(33.33% + 0.5px), transparent calc(66.66% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(66.66% - 0.5px), rgba(var(--cream-rgb), 0.35) calc(66.66% + 0.5px), transparent calc(66.66% + 0.5px));
-}
-.range {
-  width: 100%;
-  accent-color: var(--accent-bright);
 }
 .plate-canvas {
   flex-shrink: 0;
