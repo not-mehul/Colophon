@@ -148,4 +148,6 @@ export interface Draft {
   patched: Record<string, string>;
   /** Accessibility metadata to write, or null to keep the archive's. */
   a11y: A11yMeta | null;
+  /** Smaller copies of oversized images, by zip path, in the same format (absent in older drafts). */
+  images?: Record<string, Uint8Array>;
 }

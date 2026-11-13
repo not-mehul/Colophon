@@ -1636,3 +1636,23 @@ body:has(.batch-bar) {
   display: flex;
   flex-shrink: 0;
 }
+
+/* ─── Large text (WCAG 1.4.4) ─────────────────────────────────────
+   At 200% text, buttons and chips wrap their labels instead of running off
+   the screen. */
+.btn,
+.chip {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.btn-row-start > .btn {
+  flex: 0 1 auto;
+}
+.verdict {
+  flex-wrap: wrap;
+}
+.verdict-text {
+  flex: 1 1 10rem;
+  overflow-wrap: anywhere;
+}

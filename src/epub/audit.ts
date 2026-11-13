@@ -255,3 +255,6 @@ export function runAudit(edition: Edition, draft: Draft, issues: Issue[], access
 
   return { score: checks.reduce((sum, c) => sum + c.score, 0), checks };
 }
+
+/** A tier's colour for text: the scale colour pulled slightly toward the heading colour, so small labels stay readable (WCAG AA) in both themes. */
+export const tierText = (tier: Pick<Tier, 'cssVar'>) => `color-mix(in srgb, var(${tier.cssVar}) 78%, var(--text-heading))`;

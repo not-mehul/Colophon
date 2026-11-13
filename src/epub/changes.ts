@@ -41,6 +41,7 @@ const META_LABELS: [keyof Omit<Meta, 'subjects'>, string][] = [
 ];
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString('en')} ${n === 1 ? one : many}`;
+const megabytes = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
 
 /** A long value cut at a word, for the proof. */
 export function excerpt(value: string, max = 90): string {
@@ -183,6 +184,19 @@ export function describeChanges(edition: Edition, draft: Draft): Change[] {
         delete next[path];
         d.patched = next;
       },
+    });
+  }
+  const shrunk = Object.keys(draft.images ?? {});
+  if (shrunk.length) {
+    const before = shrunk.reduce((n, p) => n + (edition.files.get(p)?.byteLength ?? 0), 0);
+    const after = shrunk.reduce((n, p) => n + (draft.images![p]?.byteLength ?? 0), 0);
+    out.push({
+      id: 'images',
+      group: 'repairs',
+      label: plural(shrunk.length, 'image') + ' shrunk',
+      before: megabytes(before),
+      after: megabytes(after),
+      revert: (d) => (d.images = {}),
     });
   }
   if (draft.a11y) {

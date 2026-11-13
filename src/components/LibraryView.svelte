@@ -1,7 +1,7 @@
 <script lang="ts">
   // The library bench: recent editions as cards with their scores. A long
   // press selects editions for batch fixes, removal or sending to BookShelf.
-  import { tierOf } from '../epub/audit';
+  import { tierOf, tierText } from '../epub/audit';
   import { sampleEpub } from '../epub/sample';
   import { plural } from '../lib/format';
   import { EPUB_ACCEPT, fileBytes, pickFile } from '../lib/pick';
@@ -103,7 +103,7 @@
     </div>
     {#if library.items.length > 1}
       <p class="t-data-small dim shelf-line" id="shelfLine">
-        <span>Average <span class="tabular" style:color="var({tierOf(summary.mean).cssVar})">{summary.mean}</span></span>
+        <span>Average <span class="tabular" style:color={tierText(tierOf(summary.mean))}>{summary.mean}</span></span>
         <span>· {summary.ready} ready to shelve</span>
         {#if summary.unsaved}<span>· <span class="amber">{summary.unsaved} with unsaved edits</span></span>{/if}
       </p>

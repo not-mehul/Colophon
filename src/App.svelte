@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tierOf } from './epub/audit';
+  import { tierOf, tierText } from './epub/audit';
   import { plural } from './lib/format';
   import { applyTheme, shown, toggledTheme } from './platform/theme.svelte';
   import { EPUB_ACCEPT, fileBytes, pickFile } from './lib/pick';
@@ -142,7 +142,7 @@
       <button type="button" class="btn-icon" id="backToBench" aria-label="Back to the bench" onclick={() => bench.close()}><Icon name="arrow-left" /></button>
       <h2 class="t-card-title ellipsis edition-bar-title" id="barTitle">{bench.draft.meta.title || 'Untitled edition'}</h2>
       <p class="t-data-small dim ellipsis edition-bar-meta">
-        <span style:color="var({tier.cssVar})">{bench.audit.score} · {tier.name}</span>
+        <span style:color={tierText(tier)}>{bench.audit.score} · {tier.name}</span>
         {#if bench.changes}· <button type="button" class="link-inline amber" id="changeCount" aria-haspopup="dialog" onclick={() => ui.open('proof')}>{plural(bench.changes, 'change')} to bind</button>{:else}· {bench.edition.fileName}{/if}
       </p>
       <button type="button" class="btn btn-primary edition-bar-bind" id="bindEpub" disabled={bench.busy !== null} onclick={(e) => void bindNow(e.currentTarget)}>

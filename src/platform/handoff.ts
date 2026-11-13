@@ -4,10 +4,17 @@
 //   bookshelf://log?title=…&author=…&isbn=…&source=colophon
 //     opens BookShelf on a search for the edition, ready to add.
 //
+//   Read in Rosetta: the bound EPUB itself, handed to Rosetta as a file (an
+//     Open with, ACTION_VIEW on a content:// URI, ColophonPlugin.openWith).
+//     A whole book doesn't fit in a link, so this one goes as a file.
+//
 // When BookShelf isn't installed (or this is the web build) the caller falls
 // back to the share sheet with "Title by Author".
 
 import { AppLauncher } from '@capacitor/app-launcher';
+import { registerPlugin } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { bytesToBase64 } from '../lib/base64';
 import { buildLink } from './links';
 import { isNative } from './native';
 
@@ -37,5 +44,23 @@ export async function sendToBookShelf(book: BookShelfBook): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+export const ROSETTA_PACKAGE = 'io.github.notmehul.rosetta';
+
+const Native = registerPlugin<{
+  openWith(options: { uri: string; mime: string; package: string }): Promise<{ opened: boolean; installed: boolean }>;
+}>('Colophon');
+
+/** Hands the EPUB to Rosetta. 'missing' when Rosetta isn't installed (or on the web). */
+export async function openInRosetta(name: string, bytes: Uint8Array): Promise<'opened' | 'missing' | 'failed'> {
+  if (!isNative) return 'missing';
+  try {
+    const { uri } = await Filesystem.writeFile({ path: `rosetta/${name}`, directory: Directory.Cache, recursive: true, data: bytesToBase64(bytes) });
+    const result = await Native.openWith({ uri, mime: 'application/epub+zip', package: ROSETTA_PACKAGE });
+    return result.opened ? 'opened' : result.installed ? 'failed' : 'missing';
+  } catch {
+    return 'failed';
   }
 }

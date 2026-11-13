@@ -1,11 +1,12 @@
 <script lang="ts">
-  // Chapters: reading order, file names, the contents and the bound file's name.
+  // Chapters: reading order, file names, find and replace, the contents and the bound file's name.
   import { DEFAULT_RENAME, TEMPLATE_FIELDS, TEMPLATE_PRESETS } from '../epub/filename';
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
   import ChapterOrder from './ChapterOrder.svelte';
   import ChapterShape from './ChapterShape.svelte';
   import TocEditor from './TocEditor.svelte';
+  import FindReplace from './FindReplace.svelte';
   import Icon from './ui/Icon.svelte';
 
   let pattern = $state(settings.value.renamePattern || DEFAULT_RENAME);
@@ -51,6 +52,10 @@
   {/if}
   <ChapterShape />
   <ChapterOrder />
+</section>
+
+<section class="section-block" aria-labelledby="findHeading">
+  <FindReplace />
 </section>
 
 <section class="section-block" aria-labelledby="tocHeading">
