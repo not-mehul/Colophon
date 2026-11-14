@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { tierOf, tierText } from './epub/audit';
   import { plural } from './lib/format';
   import { applyTheme, shown, toggledTheme } from './platform/theme.svelte';
@@ -27,14 +28,14 @@
   import SettingsSheet from './components/sheets/SettingsSheet.svelte';
   import ConfirmModal from './components/ui/ConfirmModal.svelte';
   import Icon from './components/ui/Icon.svelte';
-  import { TabRail, ThemeToggle, Toast, konami, play, secretTaps } from 'dusk-dawn';
+  import { IconTabs, ThemeToggle, Toast, konami, play, secretTaps } from 'dusk-dawn';
   import { cheer, hatch } from './lib/delight';
 
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'inspection', label: 'Inspection' },
-    { id: 'imprint', label: 'Imprint' },
-    { id: 'chapters', label: 'Chapters' },
-    { id: 'catalog', label: 'Catalog' },
+  const TABS: { id: Tab; label: string; icon: Snippet }[] = [
+    { id: 'inspection', label: 'Inspection', icon: inspectionIcon },
+    { id: 'imprint', label: 'Imprint', icon: imprintIcon },
+    { id: 'chapters', label: 'Chapters', icon: chaptersIcon },
+    { id: 'catalog', label: 'Catalog', icon: catalogIcon },
   ];
   const tabs = $derived(
     TABS.map((t) => ({
@@ -116,6 +117,11 @@
   }
 </script>
 
+{#snippet inspectionIcon()}<Icon name="book-check" />{/snippet}
+{#snippet imprintIcon()}<Icon name="tags" />{/snippet}
+{#snippet chaptersIcon()}<Icon name="list-tree" />{/snippet}
+{#snippet catalogIcon()}<Icon name="library" />{/snippet}
+
 <svelte:window onkeydown={keydown} ondragover={dragover} ondragleave={(e) => e.relatedTarget === null && (dropping = false)} ondrop={(e) => void drop(e)} />
 
 <div class="glow-layer" aria-hidden="true">
@@ -151,7 +157,7 @@
     </div>
 
     <nav class="app-tabs" aria-label="Edition">
-      <TabRail {tabs} value={ui.tab} label="Edition" onselect={(id) => ui.go(id)} />
+      <IconTabs {tabs} value={ui.tab} label="Edition" onselect={(id) => ui.go(id)} />
     </nav>
 
     {#key bench.id}

@@ -183,12 +183,6 @@ ol {
 .app-tabs {
   margin-bottom: var(--space-6);
 }
-/* Four tabs fit a phone's width without scrolling once the gap tightens. */
-@media (max-width: 440px) {
-  .app-tabs .tab-rail {
-    gap: var(--space-4);
-  }
-}
 
 /* ─── Sections ───────────────────────────────────────────────── */
 
