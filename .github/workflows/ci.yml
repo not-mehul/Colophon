@@ -1,0 +1,120 @@
+name: CI
+
+# One quick job on pull requests and on pushes to main: tokens, lint, colours,
+# typecheck, unit tests, then a production build and the Playwright tests
+# against it, the same as the other apps. The Android build with an emulator
+# smoke test, and the iOS simulator build, are slow and run only when asked:
+# Actions → CI → Run workflow → "Also build the apps". A release tag still
+# builds and signs the APK in release.yml.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Also build the apps (Android with an emulator smoke test, and iOS)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      # Builds the app, then runs the end-to-end tests against it.
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+
+  android:
+    name: Android build and smoke test
+    if: github.event_name == 'workflow_dispatch' && inputs.full
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - run: npm ci
+      - run: npm run sync
+      - name: Assemble, lint
+        working-directory: android
+        run: ./gradlew assembleDebug assembleRelease lintDebug
+      - uses: actions/upload-artifact@v7
+        with:
+          name: colophon-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      # API 36: the API 37 emulator image aborts in system_server, a guest
+      # graphics driver bug (see Mise's ci.yml). Move to 37 once it is fixed.
+      - name: Install, launch, open a link, and check the app stays up
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          pre-emulator-launch-script: adb start-server
+          emulator-boot-timeout: 420
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
+          script: |
+            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n io.github.notmehul.colophon/.MainActivity
+            sleep 15
+            adb shell pidof io.github.notmehul.colophon
+            adb shell am start -W -a android.intent.action.VIEW -d 'colophon://open?source=ci' io.github.notmehul.colophon
+            sleep 5
+            adb shell pidof io.github.notmehul.colophon
+            ! adb logcat -d | grep -E 'FATAL EXCEPTION|AndroidRuntime: Process: io.github.notmehul.colophon'
+
+  ios:
+    name: iOS simulator build
+    if: github.event_name == 'workflow_dispatch' && inputs.full
+    runs-on: macos-latest
+    needs: check
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build && npx cap sync ios
+      - name: Build for the simulator
+        shell: bash # -eo pipefail, so a failed xcodebuild fails the step
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -40
