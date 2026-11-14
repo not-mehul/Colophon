@@ -1,6 +1,6 @@
 {
   "name": "colophon",
-  "version": "3.0.0",
+  "version": "1.0.3",
   "private": true,
   "description": "Colophon — an edition inspector, imprint editor and bindery for EPUB files.",
   "type": "module",
