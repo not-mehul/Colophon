@@ -5,9 +5,6 @@
   import { tierOf, tierText, type Check } from '../epub/audit';
   import type { Issue } from '../epub/validate';
   import { settle } from '../lib/appear';
-  import { sendToBookShelf } from '../platform/handoff';
-  import { shareText } from '../platform/output';
-  import { isNative } from '../platform/native';
   import { fileSize, plural, readingMinutes, readingTime } from '../lib/format';
   import { bench } from '../state/bench.svelte';
   import { settings } from '../state/settings.svelte';
@@ -27,14 +24,6 @@
   const before = $derived(new Map(bench.baseline.checks.map((c) => [c.id, c.score])));
   const next = $derived(bench.nextGain);
   const minutes = $derived(readingMinutes(edition.totalWords));
-
-  async function toBookShelf() {
-    const { title, creator, identifier } = bench.draft.meta;
-    // BookShelf's own link first (style.md §14.1); the share sheet when it isn't installed.
-    if (await sendToBookShelf({ title, creator, isbn: identifier })) return;
-    const line = creator ? `${title} by ${creator}` : title;
-    if (!(await shareText(line, line))) ui.notify('Copied. Paste into BookShelf to add it.', 'success');
-  }
 
   /** Brings a ledger row into view and puts focus on it, for "Most to gain". */
   function showCheck(id: string) {
@@ -108,10 +97,6 @@
   <div class="btn-row btn-row-start">
     <button type="button" class="btn btn-secondary" id="shareReport" onclick={() => ui.open('report')}><Icon name="file-chart-column" />Report card</button>
     <button type="button" class="btn-icon" id="shareEpub" aria-label="Share the EPUB" onclick={() => void bench.share()}><Icon name="share-2" /></button>
-    <button type="button" class="btn-icon" id="sendBookShelf" aria-label="Send to BookShelf" onclick={() => void toBookShelf()}><Icon name="library" /></button>
-    {#if isNative}
-      <button type="button" class="btn-icon" id="readRosetta" aria-label="Read in Rosetta" onclick={() => void bench.readInRosetta()}><Icon name="book-open" /></button>
-    {/if}
     {#if next}
       <button type="button" class="chip next-gain" id="nextGain" onclick={() => showCheck(next.id)}>
         <Icon name="target" />Most to gain: {next.title}, {plural(next.max - next.score, 'point')}

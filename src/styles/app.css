@@ -1467,7 +1467,7 @@ body:has(.batch-bar) {
   color: var(--text-dim);
 }
 
-/* ─── Camera barcode scanner (iOS and browsers) ──────────────── */
+/* ─── Camera barcode scanner ─────────────────────────────────── */
 
 .scanner-dialog {
   position: fixed;

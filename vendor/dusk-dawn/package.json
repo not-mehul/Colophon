@@ -1,0 +1,47 @@
+{
+  "name": "dusk-dawn",
+  "version": "3.0.0",
+  "description": "A frozen copy of Editorial Dusk & Dawn 3.0.0 for Colophon. Colophon is not part of the Dusk & Dawn suite any more, so it keeps this copy and never takes updates from the dusk-dawn repository.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "bin": {
+    "dusk-dawn": "bin/dusk-dawn.mjs"
+  },
+  "files": [
+    "bin",
+    "css",
+    "fonts",
+    "svelte",
+    "tokens.json",
+    "style.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./svelte/index.d.ts",
+      "svelte": "./svelte/index.js",
+      "default": "./svelte/index.js"
+    },
+    "./expressive": {
+      "types": "./svelte/expressive.d.ts",
+      "default": "./svelte/expressive.js"
+    },
+    "./tokens.css": "./css/tokens.css",
+    "./components.css": "./css/components.css",
+    "./tokens.json": "./tokens.json",
+    "./fonts/*": "./fonts/*",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "svelte": "./svelte/index.js",
+  "types": "./svelte/index.d.ts",
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "author": "Mehul Sen",
+  "private": true
+}

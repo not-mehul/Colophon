@@ -18,7 +18,7 @@ export interface StoredEdition {
   size: number;
   openedAt: number;
   boundAt: number | null;
-  /** Where the app last saved it (Documents/Colophon/…), so a bind saves over it. */
+  /** The file name it was last downloaded as. Kept from the app, where a bind saved over it. */
   savedPath: string | null;
   /** Unsaved edits. */
   draft: Draft | null;

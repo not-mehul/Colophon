@@ -1,13 +1,10 @@
-// Colophon: loads settings and the library bench, applies the theme, mounts
-// the Svelte UI, and wires the native shell (back button, splash, open-with).
+// Colophon: loads settings and the library bench, applies the theme and
+// mounts the Svelte UI. It runs as one HTML file in the browser.
 
-import { App as CapacitorApp } from '@capacitor/app';
-import { SplashScreen } from '@capacitor/splash-screen';
 import { dismissOverlay } from 'dusk-dawn';
 import { mount } from 'svelte';
 import App from './App.svelte';
-import { listenForFiles } from './platform/intake';
-import { isNative } from './platform/native';
+import favicon from './assets/favicon.svg?url';
 import { applyTheme } from './platform/theme.svelte';
 import { bench } from './state/bench.svelte';
 import { library } from './state/library.svelte';
@@ -16,6 +13,9 @@ import { ui } from './state/ui.svelte';
 import './styles/app.css';
 
 async function start(): Promise<void> {
+  // Inlined by the single-file build, so the tab has an icon from a file:// page too.
+  document.querySelector<HTMLLinkElement>('link[rel="icon"]')?.setAttribute('href', favicon);
+
   await Promise.all([settings.load(), library.load()]).catch((err) => console.error('Loading saved data failed:', err));
   applyTheme(settings.value.theme);
 
@@ -25,26 +25,17 @@ async function start(): Promise<void> {
   const last = settings.value.lastEditionId;
   if (last && library.get(last)) await bench.openStored(last);
 
-  ui.onLeaveEdition = () => {
-    if (!bench.edition) return false;
-    bench.close();
-    return true;
-  };
+  // Escape closes the topmost thing first: a menu, then a sheet or a modal
+  // (style.md §14). A dialog that already handled it has cancelled the event.
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (dismissOverlay() || ui.closeTop()) e.preventDefault();
+  });
 
-  if (isNative) {
-    // Android back: overlays, then Inspection, then the library, then exit.
-    void CapacitorApp.addListener('backButton', () => {
-      if (dismissOverlay()) return;
-      if (!ui.back()) void CapacitorApp.exitApp();
-    });
-    void CapacitorApp.addListener('pause', () => bench.flush());
-    void listenForFiles(
-      (file) => void bench.openBytes(file.bytes, file.name),
-      (err) => ui.notify(`Couldn't open that file (${err instanceof Error ? err.message : String(err)}).`, 'error'),
-    );
-    await SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => undefined);
-  }
   addEventListener('pagehide', () => bench.flush());
+  addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') bench.flush();
+  });
 }
 
 void start();

@@ -1,4 +1,4 @@
-// XML helpers over the platform DOMParser (the app's WebView, or jsdom in tests).
+// XML helpers over the platform DOMParser (the browser's, or jsdom in tests).
 
 export const NS = {
   opf: 'http://www.idpf.org/2007/opf',

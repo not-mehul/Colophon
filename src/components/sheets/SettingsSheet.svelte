@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Settings, saved as they change. API keys go to secure storage.
+  // Settings, saved as they change. API keys go to localStorage.
   import { EGGS, eggsFound } from '../../lib/delight';
   import { db } from '../../state/db';
   import { library } from '../../state/library.svelte';
@@ -7,7 +7,6 @@
   import type { SecretKey, Settings } from '../../state/settings';
   import { ui } from '../../state/ui.svelte';
   import { SHORTCUTS } from '../../lib/keys';
-  import { isNative } from '../../platform/native';
   import Sheet from '../ui/Sheet.svelte';
   import Switch from '../ui/Switch.svelte';
 
@@ -56,20 +55,18 @@
       <label class="field">
         <span class="t-field-label">{k.label}</span>
         <input class="input input-mono" type="password" autocomplete="off" spellcheck="false" value={settings.secrets[k.key]} onchange={(e) => void settings.setSecret(k.key, e.currentTarget.value)} />
-        <span class="field-hint">{k.hint}{isNative ? ' Kept in the device keystore.' : ''}</span>
+        <span class="field-hint">{k.hint} Kept in this browser.</span>
       </label>
     {/each}
     <label class="field">
       <span class="t-field-label">Custom catalog URL</span>
       <input class="input input-mono" type="url" placeholder="https://example.org/search?q={'{query}'}" value={v.customCatalogUrl} onchange={(e) => set({ customCatalogUrl: e.currentTarget.value.trim() })} />
     </label>
-    {#if !isNative}
-      <label class="field">
-        <span class="t-field-label">CORS proxy for covers</span>
-        <input class="input input-mono" type="url" placeholder="https://proxy.example/?url=" value={v.corsProxyUrl} onchange={(e) => set({ corsProxyUrl: e.currentTarget.value.trim() })} />
-        <span class="field-hint">Only the browser needs this. The apps download covers directly.</span>
-      </label>
-    {/if}
+    <label class="field">
+      <span class="t-field-label">CORS proxy for covers</span>
+      <input class="input input-mono" type="url" placeholder="https://proxy.example/?url=" value={v.corsProxyUrl} onchange={(e) => set({ corsProxyUrl: e.currentTarget.value.trim() })} />
+      <span class="field-hint">For cover hosts that block browsers.</span>
+    </label>
     <div class="field">
       <span class="t-field-label">Results per catalog</span>
       <div class="segmented" role="radiogroup" aria-label="Results per catalog">
@@ -109,11 +106,9 @@
     <h3 class="t-section-label">About</h3>
     <p class="t-body-small dim">Colophon {__APP_VERSION__}. An edition inspector, imprint editor and bindery for EPUB files.</p>
     <p class="t-body-small dim" id="eggCount">Easter eggs: {eggsFound()} of {EGGS.length} found</p>
-    {#if !isNative}
-      <span class="t-field-label">Keyboard</span>
-      <dl class="keys">
-        {#each SHORTCUTS as s (s.keys)}<dt>{mac ? s.keys.replace('Ctrl', '⌘') : s.keys}</dt><dd>{s.does}</dd>{/each}
-      </dl>
-    {/if}
+    <span class="t-field-label">Keyboard</span>
+    <dl class="keys">
+      {#each SHORTCUTS as s (s.keys)}<dt>{mac ? s.keys.replace('Ctrl', '⌘') : s.keys}</dt><dd>{s.does}</dd>{/each}
+    </dl>
   </section>
 </Sheet>

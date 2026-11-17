@@ -1,12 +1,10 @@
 <script lang="ts">
   // The library bench: recent editions as cards with their scores. A long
-  // press selects editions for batch fixes, removal or sending to BookShelf.
+  // press selects editions for batch fixes or removal.
   import { tierOf, tierText } from '../epub/audit';
   import { sampleEpub } from '../epub/sample';
   import { plural } from '../lib/format';
   import { EPUB_ACCEPT, fileBytes, pickFile } from '../lib/pick';
-  import { sendToBookShelf as linkToBookShelf } from '../platform/handoff';
-  import { shareText } from '../platform/output';
   import { sampleCover } from '../render/plate';
   import { bench } from '../state/bench.svelte';
   import { library } from '../state/library.svelte';
@@ -68,19 +66,6 @@
     const ids = [...library.selected];
     const undo = await library.remove(ids);
     ui.undoable(`Removed ${plural(ids.length, 'edition')} from the bench.`, () => void undo());
-  }
-
-  async function sendToBookShelf() {
-    const picked = library.selected.map((id) => library.get(id)).filter((e) => !!e);
-    // One edition goes by BookShelf's link (style.md §14.1); several go as a list of lines.
-    if (picked.length === 1 && (await linkToBookShelf({ title: picked[0]!.title, creator: picked[0]!.creator }))) {
-      library.clearSelection();
-      return;
-    }
-    const lines = picked.map((e) => (e.creator ? `${e.title} by ${e.creator}` : e.title));
-    const sent = await shareText(lines.length === 1 ? lines[0]! : 'Editions from Colophon', lines.join('\n'));
-    if (!sent) ui.notify(`Copied ${plural(lines.length, 'title')}. Paste into BookShelf to add.`, 'success');
-    library.clearSelection();
   }
 
   $effect(() => {
@@ -152,7 +137,6 @@
   <div class="batch-bar" role="toolbar" aria-label="Selected editions">
     <button type="button" class="btn-icon" aria-label="Clear selection" onclick={() => library.clearSelection()}><Icon name="x" /></button>
     <span class="batch-count tabular" aria-live="polite">{library.selected.length} selected</span>
-    <button type="button" class="btn-icon" aria-label="Send to BookShelf" onclick={() => void sendToBookShelf()}><Icon name="library" /></button>
     <button type="button" class="btn-icon" aria-label="Remove from the bench" onclick={() => void remove()}><Icon name="trash-2" /></button>
     <button type="button" class="btn btn-primary" id="batchFix" onclick={() => (batchOpen = true)}><Icon name="wrench" />Fix</button>
   </div>

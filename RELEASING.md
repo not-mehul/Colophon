@@ -1,99 +1,33 @@
 # Releasing Colophon
 
-Colophon ships as an APK you sideload; there is no Play listing. Publishing is a tag push.
+Colophon ships as one HTML file, `colophon.html`, attached to each GitHub release. There is no app to sign and nothing to install. Publishing is a tag push.
 
----
-
-## The signing key
-
-An Android APK must be signed to install, and every later version must be
-signed by **the same key**, or the phone refuses the upgrade. Losing the key
-means every install has to be uninstalled and reinstalled from scratch, which
-wipes its saved editions. Make it once and keep it somewhere you will still have it in
-five years.
-
-This makes the key with OpenSSL, as a PKCS#12 file that Gradle and Android's
-signing tools read directly (no Java needed). It works the same in Termux on
-Android (`pkg install openssl`) as on a computer:
+## Cutting a release
 
 ```bash
-openssl req -x509 -newkey rsa:4096 -sha256 -days 10000 -noenc \
-  -keyout colophon.key -out colophon.crt -subj "/CN=Colophon"
-openssl pkcs12 -export -inkey colophon.key -in colophon.crt -name colophon -out colophon.p12
-rm colophon.key colophon.crt
+git tag v1.1.0
+git push origin v1.1.0
 ```
 
-The second command asks for a password twice. Keep it: in a PKCS#12 file it is
-both the keystore password and the key password. `-name colophon` is the key alias.
-`*.p12`, `*.jks`, `*.keystore` and `keystore.properties` are in `.gitignore`; do
-not take them out.
+Or on GitHub: **Releases → Draft a new release**, type a new `vX.Y.Z` tag under *Choose a tag*, write the notes, and press **Publish release**.
 
-(`keytool -genkeypair -keystore colophon.jks -alias colophon -keyalg RSA -keysize 4096
--validity 10000` makes an equivalent key if you have a JDK.)
+Either way `.github/workflows/release.yml` sets the version from the tag (Settings → About shows it), builds the single file and attaches it to the release as `colophon.html`. A tag push with no release yet opens a **draft**; write the notes and publish it. Nothing in the repository needs bumping. The release build runs no tests, so make sure CI passed on `main` first, or run `npm run check` and `npm run test:e2e` yourself.
 
----
+A failed release build is fixed on `main` and released under a new tag; re-running the old one rebuilds the broken commit.
 
-## Building in CI (the usual path)
-
-Add four repository secrets under **Settings → Secrets and variables → Actions**:
-
-| Secret | What goes in it |
-| --- | --- |
-| `KEYSTORE_BASE64` | `base64 -w0 colophon.p12`, the whole keystore on one line |
-| `KEYSTORE_PASSWORD` | the keystore password |
-| `KEY_ALIAS` | `colophon`, the `-name` (or `-alias`) you used |
-| `KEY_PASSWORD` | the key password (for a `.p12`, the same as the keystore's) |
-
-Then tag and push:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-`.github/workflows/release.yml` builds the page and the signed release APK around
-it, and opens a **draft** GitHub release with the APK attached. Write the notes and
-press publish. It runs no tests (the build's type check is the only gate), so run
-`npm run check` yourself before tagging when a change deserves it.
-
-You can also start on GitHub instead: **Releases → Draft a new release**, type a
-new `vX.Y.Z` tag under *Choose a tag*, write the notes, and press **Publish
-release**. Publishing creates the tag and runs the same workflow, which adds the
-APK to that release a few minutes later and leaves your notes alone. Saving it as
-a draft starts nothing (GitHub runs no workflows for drafts), so publish it.
-
-If the signing secrets are missing or wrong, the run fails: there is no unsigned
-build to download by mistake.
-
----
-
-## Building on your own machine
-
-Copy `android/keystore.properties.example` to `android/keystore.properties`
-(never committed) and fill it in. `storeFile` is relative to `android/`; an
-absolute path works too. Then:
+## Building by hand
 
 ```bash
 npm ci
-npm run check
-npm version --no-git-tag-version 1.0.0   # matches the APK; leave it uncommitted
-npm run sync
-cd android && ./gradlew -PcolophonVersion=1.0.0 assembleRelease
-# app/build/outputs/apk/release/app-release.apk
+npm run build
 ```
 
-Without a keystore the release build still runs, but the APK is unsigned and no
-phone will install it.
+The whole tool is `dist/index.html`. Copy it anywhere, rename it if you like, and open it in a browser. It can also be hosted as-is on any static host.
 
----
+## Where your editions live
 
-## Version numbers
+The bench is kept in the browser's storage (IndexedDB) for the page's origin. A copy opened from disk shares that storage with other local files in the same browser; a copy opened from a website keeps its own. Moving to a new file name or a new browser starts with an empty bench, so bind and download anything you want to keep first.
 
-Both come from the tag; there is nothing in the source to bump.
+## The old Android and iOS apps
 
-- `versionName` is what a person reads, in Android's app info. A `v1.2.3` tag builds `1.2.3`.
-- `versionCode` is what Android compares, and it must rise with every release.
-  It is major × 10 000 + minor × 100 + patch, so `1.2.3` is `10203`, which keeps
-  rising while minor and patch stay under 100.
-
-Tags must be `vMAJOR.MINOR.PATCH`. A local build without `-PcolophonVersion` is `3.0.0`, the last version shipped by hand.
+Releases up to v1.0.4 were Android APKs. They keep working on the phone they are installed on but get no updates. The `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD` repository secrets are no longer used and can be deleted under **Settings → Secrets and variables → Actions**. Keep a copy of the signing key itself if you might ever build an APK again.

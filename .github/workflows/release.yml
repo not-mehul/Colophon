@@ -1,9 +1,9 @@
 name: Release
 
 # Push a vX.Y.Z tag, or publish a release with a new tag from GitHub's
-# release page. This builds the signed APK and attaches it to that release
-# (a new draft if there isn't one). No tests run here: the build's type check
-# is the only gate. Run `npm run check` locally when you want the full suite.
+# release page. This builds Colophon as one HTML file and attaches it to that
+# release (a new draft if there isn't one). The version comes from the tag;
+# nothing in the repository needs bumping.
 on:
   push:
     tags: ["v*"]
@@ -22,7 +22,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     env:
       VERSION: ${{ github.ref_name }}
     steps:
@@ -33,46 +33,19 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - uses: android-actions/setup-android@v4
-
-      - uses: gradle/actions/setup-gradle@v6
-
       - run: npm ci
 
-      # Kept outside the workspace so it can never be committed.
-      - name: Restore the signing key
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::error::KEYSTORE_BASE64 is not set. See RELEASING.md."
-            exit 1
-          fi
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/colophon.jks"
-
-      - name: Build the APK
-        env:
-          COLOPHON_KEYSTORE: ${{ runner.temp }}/colophon.jks
-          COLOPHON_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          COLOPHON_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          COLOPHON_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Build the HTML file
         run: |
           version="${VERSION#v}"
           npm version --no-git-tag-version --allow-same-version "$version"
-          npm run sync
-          (cd android && ./gradlew --no-daemon -PcolophonVersion="$version" assembleRelease)
-          cp android/app/build/outputs/apk/release/app-release.apk "colophon-$version.apk"
+          npm run build
+          cp dist/index.html colophon.html
 
-      - name: Attach the APK to the release
+      - name: Attach it to the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          apk="colophon-${VERSION#v}.apk"
-          gh release upload "$VERSION" "$apk" --clobber \
-            || gh release create "$VERSION" "$apk" --draft --verify-tag --title "Colophon $VERSION" \
-                 --notes "Download the APK below and open it on the phone. Requires Android 7.0 or later."
+          gh release upload "$VERSION" colophon.html --clobber \
+            || gh release create "$VERSION" colophon.html --draft --verify-tag --title "Colophon $VERSION" \
+                 --notes "Download colophon.html and open it in a browser. Everything is in that one file; it needs no install and works offline."

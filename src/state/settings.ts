@@ -1,5 +1,5 @@
 // Settings: everything but the API keys is stored in IndexedDB; the keys go to
-// the platform's secure storage (Keychain on iOS, the Android Keystore).
+// localStorage (src/platform/secrets.ts).
 
 import { DEFAULT_RENAME, DEFAULT_TEMPLATE } from '../epub/filename';
 
