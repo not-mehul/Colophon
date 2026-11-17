@@ -1,30 +1,15 @@
-// Scanning a book's ISBN barcode.
-//
-// In the Android app, Google's Code Scanner through the Colophon plugin
-// (android/.../ColophonPlugin.kt): Play services draws the camera UI, so the
-// app needs no camera permission. Elsewhere (iOS, browsers) a camera modal
-// reads frames with the Shape Detection API, or with ZXing where that is missing.
+// Scanning a book's ISBN barcode: a camera modal reads frames with the Shape
+// Detection API, or with ZXing where that is missing (Safari, Firefox).
 
-import { registerPlugin } from '@capacitor/core';
 import { mount, unmount } from 'svelte';
 import CameraScanner from '../components/CameraScanner.svelte';
-import { platform } from './native';
-
-interface ColophonPlugin {
-  scanBarcode(): Promise<{ value?: string }>;
-}
-const Colophon = registerPlugin<ColophonPlugin>('Colophon');
 
 export function canScanBarcodes(): boolean {
-  return platform === 'android' || !!navigator.mediaDevices?.getUserMedia;
+  return !!navigator.mediaDevices?.getUserMedia;
 }
 
 /** Resolves with the scanned code, or null if the reader cancelled. */
 export async function scanBarcode(): Promise<string | null> {
-  if (platform === 'android') {
-    const { value } = await Colophon.scanBarcode();
-    return value?.trim() || null;
-  }
   let stream: MediaStream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
@@ -48,7 +33,7 @@ export async function scanBarcode(): Promise<string | null> {
 
 type Decoder = (frame: HTMLCanvasElement | HTMLVideoElement) => Promise<string | null>;
 
-/** BarcodeDetector where the browser has it (Chrome, Android WebView), ZXing elsewhere (Safari). */
+/** BarcodeDetector where the browser has it (Chrome), ZXing elsewhere (Safari, Firefox). */
 export async function makeDecoder(): Promise<Decoder> {
   const formats = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
   if ('BarcodeDetector' in globalThis) {

@@ -1,6 +1,6 @@
 # Developing Colophon
 
-How Colophon is built, run and tested. For what the app does, see the [README](../README.md); for cutting a release, see [RELEASING.md](../RELEASING.md).
+How Colophon is built, run and tested. For what it does, see the [README](../README.md); for cutting a release, see [RELEASING.md](../RELEASING.md).
 
 ## Run it
 
@@ -8,27 +8,21 @@ How Colophon is built, run and tested. For what the app does, see the [README](.
 npm install
 npm run dev          # http://localhost:5173
 npm run check        # tokens, lint, literal colours, typecheck, unit tests
-npm run test:e2e     # builds, then a Playwright smoke test at phone size
+npm run build        # dist/index.html, the whole tool in one file
+npm run test:e2e     # builds, then the Playwright tests at phone size
 ```
 
-Svelte 5, TypeScript and Vite. The library lives in IndexedDB (Dexie). API keys go to the platform's secure storage (the Keychain on iOS, the Android Keystore), or to localStorage in the browser.
+Svelte 5, TypeScript and Vite. The library lives in IndexedDB (Dexie). API keys go to localStorage.
 
-## Android and iOS
+## One HTML file
 
-Capacitor 8 wraps the same build for Android and iOS.
+`vite-plugin-singlefile` inlines the scripts, the styles, Fraunces and the icons into `dist/index.html`, and the lazy ZXing chunk with them, so the file opens from disk over `file://` and fetches nothing. `tests/e2e/standalone.spec.ts` opens the built file that way with every network request refused and checks it still works. Keep it that way: no Web Workers in separate files, no assets in `public/`, nothing loaded from a URL at run time.
 
-```sh
-npm run android      # build, sync and open Android Studio
-npm run android:apk  # a debug APK
-npm run ios          # build, sync and open Xcode
-npm run assets       # redraw the app icon and splash screens
-```
-
-- **Open with.** Android registers a VIEW intent for `application/epub+zip`; iOS declares the `org.idpf.epub-container` document type. Both arrive through `appUrlOpen` (`src/platform/intake.ts`).
-- **Links between the apps.** Colophon registers `colophon://` (`colophon://open` brings it forward) and may ask whether its six siblings are installed. *Send to BookShelf* opens `bookshelf://log?title=…&author=…&isbn=…` when BookShelf is there, and falls back to the share sheet otherwise (`src/platform/handoff.ts`). The scheme convention is shared by all seven apps (`src/platform/links.ts`, style.md §14.1).
-- **ISBN scanning.** On Android, Google's Code Scanner through `ColophonPlugin` (no camera permission). On iOS and in browsers, a camera view that reads frames with `BarcodeDetector`, or ZXing where that is missing.
-- **System.** The back button closes the topmost sheet, then returns to Inspection, then to the bench. The system bars follow the theme, and the splash is Dusk's `--bg-grad-mid` behind the amber C.
-- Catalog and cover requests use native HTTP in the apps, so cover hosts don't need CORS headers. In a browser, a CORS proxy can be set in Settings.
+- **Opening files.** The Open button, Ctrl/⌘ O, or dropping an EPUB on the page.
+- **Saving.** Binding downloads the EPUB. Share uses the browser's share sheet where there is one (Chrome on Android, Safari), and downloads otherwise.
+- **ISBN scanning.** A camera view that reads frames with `BarcodeDetector`, or ZXing where that is missing.
+- **Escape** closes the topmost menu, sheet or modal.
+- **Catalogs and covers** are fetched by the browser. Google Books and Open Library allow it; a cover host that sends no CORS headers needs the CORS proxy in Settings.
 
 ## Layout
 
@@ -38,15 +32,15 @@ npm run assets       # redraw the app icon and splash screens
 | `src/catalog/` | Catalog sources, ISBN handling, match confidence and the offline cache |
 | `src/state/` | The bench (the open edition and its draft), the library, settings, batch fixes and UI state |
 | `src/components/` | The views and sheets; `ui/` holds Colophon's own pieces; TabRail, Toast and ThemeToggle come from `dusk-dawn` |
-| `src/platform/` | Native bridges: files, share, haptics, the scanner, secrets, theme |
+| `src/platform/` | Browser pieces: downloads and share, vibration, the scanner, secrets, theme, HTTP |
 | `src/render/` | Canvas drawing: cover plates, crops, thumbnails and the report card |
 | `src/styles/` | `app.css`, which imports `dusk-dawn/tokens.css` and `dusk-dawn/components.css` first |
-| `tests/` | Vitest unit tests with EPUB 2, EPUB 3 and broken fixtures, and the Playwright smoke test |
-| `android/`, `ios/` | The Capacitor projects |
+| `vendor/dusk-dawn/` | The frozen copy of the design package (below) |
+| `tests/` | Vitest unit tests with EPUB 2, EPUB 3 and broken fixtures, and the Playwright tests |
 
-## Design tokens
+## Design
 
-Tokens, fonts and the shared components live in the [`dusk-dawn`](https://github.com/not-mehul/dusk-dawn) package, installed at a tag. To change the design, change the package, tag a release, and move the tag in `package.json` (`style.md` §18). `dusk-dawn check` (part of `npm run check`) tests contrast in both themes, and `dusk-dawn colours` (part of `npm run lint`) fails on any literal colour in `src/`.
+Colophon keeps the Editorial Dusk & Dawn look but is no longer part of the Dusk & Dawn suite. It uses a frozen copy of the design package at 3.0.0 in [`vendor/dusk-dawn/`](../vendor/dusk-dawn), installed as `"dusk-dawn": "file:vendor/dusk-dawn"`, and does not follow changes to the [`dusk-dawn`](https://github.com/not-mehul/dusk-dawn) repository. `vendor/dusk-dawn/style.md` is the spec. To change the look, edit the copy and run `node vendor/dusk-dawn/bin/dusk-dawn.mjs build`. `dusk-dawn check` (part of `npm run check`) tests contrast in both themes, and `dusk-dawn colours` (part of `npm run lint`) fails on any literal colour in `src/`.
 
 ```sh
 npm run icons        # regenerate src/components/ui/icons.ts after using a new Lucide name

@@ -4,7 +4,7 @@
 /** package.json version, injected by vite.config.ts. */
 declare const __APP_VERSION__: string;
 
-/** The Shape Detection API (Chrome and Android WebView; not yet in TypeScript's DOM lib). */
+/** The Shape Detection API (Chrome; not yet in TypeScript's DOM lib). */
 declare class BarcodeDetector {
   constructor(options?: { formats: string[] });
   static getSupportedFormats(): Promise<string[]>;

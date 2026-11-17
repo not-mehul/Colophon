@@ -1,0 +1,2215 @@
+/*
+ * Editorial Dusk & Dawn, Expressive: the shared components (style.md §4–§11).
+ *
+ * Material 3 Expressive on the editorial palette: shapes from the corner
+ * scale that morph on press and selection, springs for everything that
+ * moves, and a few moments of delight (§11.3). Reduced motion turns every
+ * spring and every flourish off.
+ *
+ * Shipped by the dusk-dawn package and shared by every app. Change it here,
+ * never in an app, and keep app-specific styling in each app's own
+ * stylesheet. It uses only the tokens in tokens.css and never names a colour.
+ */
+
+/* ─── Base ───────────────────────────────────────────────────── */
+
+/* Safe areas (§14). Capacitor's SystemBars sets --safe-area-inset-* with the
+   real insets, because some Android WebViews report env() as 0. */
+:root {
+  --inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+  --inset-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-body);
+  background: linear-gradient(180deg, var(--bg-grad-top) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-bot) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ─── Atmosphere (§4): no blur, the gradients are soft already ── */
+
+.glow-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.glow {
+  position: absolute;
+  border-radius: 50%;
+}
+.glow-1 {
+  top: -20%;
+  right: -15%;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-amber-rgb), 0.1) 0%,
+    rgba(var(--accent-amber-rgb), 0.03) 30%,
+    transparent 60%
+  );
+}
+.glow-2 {
+  bottom: -30%;
+  left: -20%;
+  width: 1000px;
+  height: 1000px;
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-sage-rgb), 0.08) 0%,
+    rgba(var(--accent-sage-rgb), 0.02) 35%,
+    transparent 65%
+  );
+}
+.glow-3 {
+  top: 40%;
+  left: 30%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(var(--cream-rgb), 0.03) 0%, transparent 60%);
+}
+
+/* ─── Type scale (§5.2) ──────────────────────────────────────── */
+
+.t-page-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  margin: 0;
+}
+.t-page-title em,
+.t-section-heading em {
+  color: var(--accent-amber);
+}
+.t-section-heading {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  margin: 0;
+}
+.t-card-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  margin: 0;
+}
+.t-verdict {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  color: var(--text-heading);
+}
+.t-stat {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.875rem;
+  line-height: 1.05;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+.t-tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.125rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+  margin: 0;
+}
+.t-body-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.t-data {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--text-strong);
+}
+.t-data-small {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.t-section-label,
+.eyebrow,
+.t-field-label {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0;
+}
+.t-section-label,
+.eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.25em;
+}
+.t-field-label {
+  display: block;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+}
+.t-hint {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+}
+/* The italic-term footnote: "Private. Everything stays on this device." */
+.t-hint b,
+.t-hint strong {
+  font-weight: 400;
+  color: var(--text-heading);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+/* One instruction read from across the counter (cooking mode, Mise). */
+.t-step {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.625rem, 4.5vw + 0.5rem, 2.5rem);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 640px) {
+  .t-page-title {
+    font-size: 4rem;
+    line-height: 0.95;
+  }
+  .t-verdict {
+    font-size: 3rem;
+  }
+}
+
+/* ─── Surfaces (§7) ──────────────────────────────────────────── */
+
+.panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--corner-lg);
+  padding: var(--space-5);
+}
+.hairline-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--border-faint);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--corner-lg);
+  overflow: hidden;
+}
+
+/* ─── Buttons (§8.1) ─────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--corner-full);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    box-shadow var(--spring-effects-default-dur) var(--spring-effects-default),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+/* Shape morph (§6.4): a pressed button squares off and gives under the finger,
+   then springs back to its pill. */
+.btn:active:not(:disabled) {
+  border-radius: var(--corner-md);
+  transform: scale(var(--press-scale));
+}
+.btn svg {
+  transition: transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.btn:hover:not(:disabled) svg {
+  transform: translateX(1px) rotate(-4deg);
+}
+.btn-primary {
+  background: var(--accent-bright);
+  color: var(--on-accent);
+  box-shadow: 0 0 40px rgba(var(--accent-amber-rgb), 0.25);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-bright-hover);
+  box-shadow: 0 0 56px rgba(var(--accent-amber-rgb), 0.3);
+}
+.btn-secondary {
+  border-color: var(--text-strong);
+  color: var(--text-strong);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--text-strong);
+  color: var(--on-invert);
+}
+.btn-muted {
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.btn-muted:hover:not(:disabled) {
+  border-color: var(--text-dim);
+  color: var(--text-heading);
+}
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+.btn:disabled {
+  background: var(--disabled-bg);
+  border-color: transparent;
+  color: var(--text-faint);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-block {
+  width: 100%;
+}
+/* Paired buttons are the same size; the committing one goes on the right. */
+.btn-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.btn-row > .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--corner-full);
+  color: var(--text-dim);
+  transition:
+    color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.btn-icon:hover {
+  color: var(--text-heading);
+}
+.btn-icon:active {
+  background: var(--hover-bg);
+  border-radius: var(--corner-md);
+  transform: scale(var(--press-scale));
+}
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.fab {
+  position: fixed;
+  right: calc(var(--space-5) + var(--inset-right));
+  bottom: calc(var(--space-5) + var(--inset-bottom));
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--corner-lg);
+  background: var(--accent-bright);
+  color: var(--on-accent);
+  box-shadow:
+    0 0 40px rgba(var(--accent-amber-rgb), 0.25),
+    0 8px 24px rgba(var(--shadow-rgb), calc(0.4 * var(--shadow-strength)));
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-default-dur) var(--spring-spatial-default),
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+/* The FAB rounds towards a circle under the pointer, and its plus turns. */
+.fab:hover {
+  background: var(--accent-bright-hover);
+  border-radius: var(--corner-xl);
+}
+.fab:active {
+  border-radius: var(--corner-full);
+  transform: scale(0.92);
+}
+.fab svg {
+  width: 22px;
+  height: 22px;
+  transition: transform var(--spring-spatial-slow-dur) var(--spring-spatial-slow);
+}
+.fab:hover svg {
+  transform: rotate(90deg);
+}
+
+/* ─── Chips and badges (§8.2) ────────────────────────────────── */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* A touch target (§14): 44px, never the 36px it used to be. */
+  min-height: 44px;
+  padding: 0 0.875rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--corner-sm);
+  background: var(--chip-bg);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.chip:active {
+  transform: scale(var(--press-scale));
+}
+.chip:hover {
+  background: var(--chip-bg-hover);
+}
+.chip[aria-pressed='true'],
+.chip[aria-checked='true'],
+.chip[aria-selected='true'] {
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
+  color: var(--on-accent);
+  border-radius: var(--corner-full);
+}
+.chip-tag {
+  background: rgba(var(--accent-amber-rgb), 0.14);
+  color: var(--text-heading);
+}
+.chip-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--corner-full);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.chip-status.is-done {
+  border-color: rgba(var(--accent-sage-rgb), 0.5);
+  color: var(--accent-sage);
+}
+.chip-status.is-active {
+  border-color: rgba(var(--accent-amber-rgb), 0.5);
+  color: var(--accent-amber);
+}
+.badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: var(--corner-full);
+  background: rgba(var(--accent-amber-rgb), 0.15);
+  color: var(--accent-amber);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Segmented control (§8.4) ───────────────────────────────── */
+
+/* A connected button group (Material 3 Expressive): inner corners are small,
+   the ends are round, and the chosen option morphs into a full pill. */
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--corner-lg-plus);
+  background: var(--panel-bg-faint);
+}
+.segmented button {
+  min-height: 40px;
+  padding: 0 0.875rem;
+  border-radius: var(--corner-xs);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition:
+    background-color var(--spring-effects-default-dur) var(--spring-effects-default),
+    color var(--spring-effects-default-dur) var(--spring-effects-default),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.segmented button:first-child {
+  border-top-left-radius: var(--corner-lg);
+  border-bottom-left-radius: var(--corner-lg);
+}
+.segmented button:last-child {
+  border-top-right-radius: var(--corner-lg);
+  border-bottom-right-radius: var(--corner-lg);
+}
+.segmented button:hover {
+  background: var(--hover-bg);
+}
+.segmented button:active {
+  transform: scale(var(--press-scale));
+}
+.segmented button[aria-checked='true'],
+.segmented button[aria-pressed='true'],
+.segmented button[aria-selected='true'] {
+  background: var(--accent-bright);
+  color: var(--on-accent);
+  font-weight: 500;
+  border-radius: var(--corner-full);
+}
+
+/* ─── Tab rail (§8.5) ────────────────────────────────────────── */
+
+.tab-rail {
+  position: relative;
+  display: flex;
+  gap: var(--space-5);
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border-soft);
+}
+.tab-rail::-webkit-scrollbar {
+  display: none;
+}
+.tab-rail [role='tab'] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: color var(--dur-hover);
+}
+.tab-rail [role='tab']:hover,
+.tab-rail [role='tab'][aria-selected='true'] {
+  color: var(--text-heading);
+}
+.tab-rail [role='tab']:focus-visible {
+  outline-offset: -2px;
+}
+.tab-rule {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 3px;
+  width: var(--rule-width, 0);
+  transform: translateX(var(--rule-x, 0));
+  border-radius: 3px 3px 0 0;
+  background: var(--accent-amber);
+  opacity: var(--rule-opacity, 1);
+  pointer-events: none;
+  transition:
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    width var(--spring-spatial-default-dur) var(--spring-spatial-default),
+    opacity var(--spring-effects-fast-dur) var(--spring-effects-fast);
+}
+
+/* ─── Icon tabs (§8.5.1) ─────────────────────────────────────── */
+
+.icon-tabs {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-bottom: 1px solid var(--border-soft);
+}
+.icon-tabs [role='tab'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-1) var(--space-3);
+  background: none;
+  border: 0;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--dur-hover);
+}
+.icon-tabs [role='tab']:hover,
+.icon-tabs [role='tab'][aria-selected='true'] {
+  color: var(--text-heading);
+}
+.icon-tabs [role='tab']:focus-visible {
+  outline-offset: -2px;
+}
+.icon-tab-glyph {
+  position: relative;
+  display: inline-flex;
+  transition: color var(--dur-hover);
+}
+.icon-tabs [role='tab'][aria-selected='true'] .icon-tab-glyph {
+  color: var(--accent-amber);
+}
+.icon-tab-glyph > svg {
+  width: 22px;
+  height: 22px;
+}
+.icon-tab-glyph .badge {
+  position: absolute;
+  top: -6px;
+  left: calc(100% - 8px);
+  margin: 0;
+  background: var(--accent-bright);
+  color: var(--on-accent);
+}
+.icon-tab-word {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Compact icon tabs (§8.5.2): icons in a row; the selected tab opens to
+   show its word beside the icon, on the default spatial spring. The word stays
+   in the tab (only clipped), so every tab keeps its accessible name. */
+.icon-tabs-compact {
+  display: flex;
+  justify-content: space-between;
+}
+.icon-tabs-compact [role='tab'] {
+  flex: 0 0 auto;
+  flex-direction: row;
+  min-width: 44px;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-2) var(--space-3);
+}
+.icon-tabs-compact [role='tab'][aria-selected='true'] {
+  flex: 0 1 auto;
+}
+/* The last tab's count overhangs to the right: room for it inside the rail. */
+.icon-tabs-compact [role='tab']:last-of-type:has(.badge) {
+  padding-right: calc(var(--space-2) + 0.5rem);
+}
+.icon-tab-inner {
+  display: grid;
+  grid-template-columns: auto 0fr;
+  align-items: center;
+  min-width: 0;
+  transition: grid-template-columns var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+.icon-tabs-compact [role='tab'][aria-selected='true'] .icon-tab-inner {
+  grid-template-columns: auto 1fr;
+}
+.icon-tab-reveal {
+  min-width: 0;
+  overflow: hidden;
+}
+.icon-tabs-compact .icon-tab-word {
+  display: block;
+  padding-left: var(--space-2);
+  font-size: 0.6875rem;
+  opacity: 0;
+  transition: opacity var(--spring-effects-fast-dur) var(--spring-effects-fast);
+}
+.icon-tabs-compact [role='tab'][aria-selected='true'] .icon-tab-word {
+  opacity: 1;
+}
+/* The count sits on the icon's corner and overhangs it: the word starts
+   clear of it, at any text size. */
+.icon-tabs-compact [role='tab']:has(.badge) .icon-tab-word {
+  padding-left: calc(10px + 0.75rem);
+}
+/* Not enough room for the selected word whole (a narrow phone, large text):
+   the icon alone, amber, with the rule under it. */
+.icon-tabs-compact.is-tight [role='tab'][aria-selected='true'] .icon-tab-inner {
+  grid-template-columns: auto 0fr;
+}
+.icon-tabs-compact.is-tight [role='tab'][aria-selected='true'] .icon-tab-word {
+  opacity: 0;
+}
+
+/* ─── Inputs (§8.6) ──────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.field-hint {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+}
+.field-error {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--danger);
+  margin: 0;
+}
+.input,
+.select,
+.textarea,
+.picker-field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6875rem 0.875rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--corner-sm);
+  color: var(--text-strong);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.3;
+  text-align: left;
+  transition:
+    border-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.input:focus,
+.select:focus,
+.textarea:focus,
+.picker-field[aria-expanded='true'] {
+  outline: none;
+  border-color: var(--accent-amber);
+  border-radius: var(--corner-md);
+}
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible,
+.picker-field:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.input::placeholder,
+.textarea::placeholder {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-faint);
+  opacity: 1;
+}
+.input[aria-invalid='true'],
+.select[aria-invalid='true'],
+.textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+.input-mono,
+.picker-field {
+  font-family: var(--font-mono);
+}
+.input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.textarea {
+  min-height: 96px;
+  line-height: 1.55;
+  resize: vertical;
+}
+.select {
+  padding-right: 2.25rem;
+  /* A chevron drawn with two gradients so it takes the theme's colour. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.125rem) 50%,
+    calc(100% - 0.8125rem) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.select option {
+  background: var(--sheet-bg);
+  color: var(--text-strong);
+}
+.picker-field {
+  cursor: pointer;
+}
+
+/* ─── Select menu (§8.6.1) ───────────────────────────────────── */
+
+/* The field: a .select with a drawn chevron that turns as the menu opens. */
+.dd-select {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-right: 0.75rem;
+  background-image: none;
+}
+.dd-select[aria-expanded='true'] {
+  border-color: var(--accent-amber);
+  border-radius: var(--corner-md);
+}
+.dd-select:disabled {
+  background-color: var(--disabled-bg);
+  color: var(--text-faint);
+  cursor: default;
+}
+.dd-select-text {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+.dd-select-value,
+.dd-select-sizer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.dd-select-sizer {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.dd-select-sizer::before {
+  content: attr(data-label);
+}
+.dd-select-value.is-placeholder {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-faint);
+}
+.dd-select-chevron {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-dim);
+  transition:
+    rotate var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    color var(--spring-effects-fast-dur) var(--spring-effects-fast);
+}
+.dd-select[aria-expanded='true'] .dd-select-chevron {
+  rotate: 180deg;
+  color: var(--accent-amber);
+}
+
+/* The menu: an opaque card in the top layer, under (or over) the field. */
+.dd-menu {
+  position: fixed;
+  inset: auto;
+  z-index: 1000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  margin: 0;
+  padding: var(--space-2);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--modal-bg);
+  color: var(--text-body);
+  border: 1px solid var(--border);
+  border-radius: var(--corner-lg);
+  box-shadow:
+    0 16px 40px rgba(var(--shadow-rgb), calc(0.55 * var(--shadow-strength))),
+    0 0 48px rgba(var(--accent-amber-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--cream-rgb), 0.05);
+  font-family: var(--font-sans);
+  transform-origin: top center;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.dd-menu.above {
+  transform-origin: bottom center;
+}
+.dd-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dd-menu-group + .dd-menu-group,
+.dd-option + .dd-menu-group,
+.dd-menu-group + .dd-option {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--border-faint);
+}
+.dd-menu-group-label {
+  padding: 0.625rem 0.875rem 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.dd-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--corner-sm);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--text-body);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.dd-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.dd-option-check {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--accent-amber);
+  visibility: hidden;
+}
+.dd-option[data-active] {
+  background: var(--hover-bg);
+  color: var(--text-heading);
+}
+/* The chosen option is lit and ticked, and rounds towards a pill (§6.4). */
+.dd-option[aria-selected='true'] {
+  background: rgba(var(--accent-amber-rgb), 0.14);
+  color: var(--text-heading);
+  font-weight: var(--weight-emphasized);
+  border-radius: var(--corner-xl);
+}
+.dd-option[aria-selected='true'][data-active] {
+  background: rgba(var(--accent-amber-rgb), 0.22);
+}
+.dd-option[aria-selected='true'] .dd-option-check {
+  visibility: visible;
+}
+.dd-option[aria-disabled='true'] {
+  color: var(--text-faint);
+  cursor: default;
+}
+/* While the keyboard drives the menu, the active option carries the focus ring. */
+.dd-select:focus-visible + .dd-menu .dd-option[data-active] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* ─── Time picker (§8.6, Pickers) ────────────────────────────── */
+
+.dd-time-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dd-time-field > svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--accent-amber);
+}
+.dd-time-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dd-time-value.is-placeholder {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-faint);
+}
+.dd-picker-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 420px;
+}
+.dd-picker-head {
+  flex-direction: row;
+  align-items: center;
+}
+.dd-picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+/* Clocks share one six-wide grid. */
+.dd-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(3rem, calc((100% - 10px) / 6)), 1fr));
+  gap: 2px;
+}
+.dd-picker-cell {
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  border-radius: var(--corner-sm);
+  background: var(--panel-bg-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-body);
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.dd-picker-cell:hover {
+  background: var(--hover-bg);
+}
+.dd-picker-cell[aria-pressed='true'],
+.dd-picker-cell[aria-pressed='true']:hover {
+  background: var(--accent-bright);
+  color: var(--on-accent);
+  border-radius: var(--corner-full);
+}
+.dd-picker-cell:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ─── Checkbox (§8.6) ────────────────────────────────────────── */
+
+/* A drawn checkbox: put .check on <input type="checkbox">. The row or label
+   around it is the 44px target. */
+.check {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  border: 1.5px solid var(--text-dim);
+  border-radius: var(--corner-xs);
+  background: var(--input-bg);
+  cursor: pointer;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    scale var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.check::after {
+  content: '';
+  width: 0.55rem;
+  height: 0.3rem;
+  border: 2px solid var(--on-accent);
+  border-top: 0;
+  border-right: 0;
+  translate: 0 -1px;
+  rotate: -45deg;
+  scale: 0;
+  transition: scale var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.check:checked {
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
+  border-radius: var(--corner-sm);
+}
+.check:checked::after {
+  scale: 1;
+}
+.check:active {
+  scale: var(--press-scale);
+}
+.check:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.check:disabled {
+  background: var(--disabled-bg);
+  border-color: var(--border);
+  cursor: default;
+}
+
+/* ─── Slider (§8.6) ──────────────────────────────────────────── */
+
+/* Put .range on <input type="range">: a 4px track, an amber fill where the
+   browser can draw one, and a round bright thumb, inside a 44px target. */
+.range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--corner-full);
+  background: var(--chart-track);
+}
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: var(--corner-full);
+  background: var(--chart-track);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: var(--corner-full);
+  background: var(--accent-amber);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border-radius: var(--corner-full);
+  background: var(--accent-bright);
+  box-shadow: 0 0 0 1px var(--on-accent);
+  transition: scale var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--corner-full);
+  background: var(--accent-bright);
+  box-shadow: 0 0 0 1px var(--on-accent);
+}
+.range:active::-webkit-slider-thumb {
+  scale: 1.2;
+}
+.range:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.range:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* ─── Theme toggle (§8.9) ────────────────────────────────────── */
+
+.theme-toggle {
+  --track-w: 60px;
+  --track-h: 32px;
+  --inset: 3px;
+  --knob: calc(var(--track-h) - 2 * var(--inset) - 2px);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: var(--track-w);
+  height: var(--track-h);
+  border: 1px solid var(--border);
+  border-radius: var(--corner-full);
+  background: var(--input-bg);
+  transition: border-color var(--spring-effects-fast-dur) var(--spring-effects-fast);
+}
+.theme-toggle:hover {
+  border-color: var(--text-dim);
+}
+/* Each icon is centred where the knob rests, so it sits exactly under it. */
+.theme-toggle .toggle-icon {
+  position: absolute;
+  top: var(--inset);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--knob);
+  height: var(--knob);
+  color: var(--text-dim);
+  transition: color var(--dur-toggle) var(--ease-standard);
+}
+.theme-toggle .toggle-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2;
+  transition: rotate var(--spring-spatial-slow-dur) var(--spring-spatial-slow);
+}
+/* The sun's rays turn as it rises; the moon tips as it sets. */
+.theme-toggle[aria-checked='true'] .icon-sun svg {
+  rotate: 90deg;
+}
+.theme-toggle[aria-checked='false'] .icon-moon svg {
+  rotate: -15deg;
+}
+.theme-toggle .icon-moon {
+  left: var(--inset);
+}
+.theme-toggle .icon-sun {
+  right: var(--inset);
+}
+.theme-toggle .knob {
+  position: absolute;
+  top: var(--inset);
+  left: var(--inset);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: var(--corner-full);
+  background: var(--accent-bright);
+  box-shadow: 0 0 12px rgba(var(--accent-bright-rgb), 0.35);
+  transition:
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    scale var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.theme-toggle:active .knob {
+  scale: 1.18 0.88;
+}
+.theme-toggle[aria-checked='false'] .icon-moon,
+.theme-toggle[aria-checked='true'] .icon-sun {
+  color: var(--on-accent);
+}
+.theme-toggle[aria-checked='true'] .knob {
+  transform: translateX(calc(var(--track-w) - 2 * var(--inset) - 2px - var(--knob)));
+}
+
+/* ─── Modal (§8.10) ──────────────────────────────────────────── */
+
+.modal-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  padding: calc(var(--space-4) + var(--inset-top)) calc(var(--space-4) + var(--inset-right))
+    calc(var(--space-4) + var(--inset-bottom)) calc(var(--space-4) + var(--inset-left));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--modal-backdrop);
+  color: var(--text-body);
+  animation: fade-in var(--spring-effects-slow-dur) var(--spring-effects-slow);
+}
+.modal-dialog:not([open]) {
+  display: none;
+}
+.modal-dialog::backdrop {
+  background: transparent;
+}
+body:has(.modal-dialog[open], .sheet[open]) {
+  overflow: hidden;
+}
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 1.75rem;
+  /* Corner brackets, 14px in from the top-left and bottom-right of the frame.
+     They are background layers, not pseudo-elements: a scroll container's own
+     background stays put while its content scrolls, so they keep to the frame
+     and never ride over the content (style.md §8.10). */
+  --bracket: rgba(var(--accent-amber-rgb), 0.5);
+  --bracket-r: var(--corner-sm);
+  --bracket-arm: calc(14px - var(--bracket-r));
+  --bracket-arc: transparent calc(var(--bracket-r) - 1.25px),
+    var(--bracket) calc(var(--bracket-r) - 0.75px) calc(var(--bracket-r) - 0.25px),
+    transparent calc(var(--bracket-r) + 0.25px);
+  background:
+    radial-gradient(circle at 100% 100%, var(--bracket-arc)) 14px 14px / var(--bracket-r) var(--bracket-r) no-repeat,
+    linear-gradient(var(--bracket), var(--bracket)) calc(14px + var(--bracket-r)) 14px / var(--bracket-arm) 1px no-repeat,
+    linear-gradient(var(--bracket), var(--bracket)) 14px calc(14px + var(--bracket-r)) / 1px var(--bracket-arm) no-repeat,
+    radial-gradient(circle at 0 0, var(--bracket-arc)) right 14px bottom 14px / var(--bracket-r) var(--bracket-r) no-repeat,
+    linear-gradient(var(--bracket), var(--bracket)) right calc(14px + var(--bracket-r)) bottom 14px / var(--bracket-arm) 1px no-repeat,
+    linear-gradient(var(--bracket), var(--bracket)) right 14px bottom calc(14px + var(--bracket-r)) / 1px var(--bracket-arm) no-repeat,
+    var(--modal-bg);
+  border: 1px solid rgba(var(--accent-amber-rgb), 0.3);
+  border-radius: var(--corner-xl);
+  box-shadow:
+    0 30px 80px rgba(var(--shadow-rgb), calc(0.7 * var(--shadow-strength))),
+    0 0 80px rgba(var(--accent-amber-rgb), 0.18),
+    inset 0 1px 0 rgba(var(--cream-rgb), 0.05);
+  animation: modal-in var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+.modal-dialog.closing {
+  animation: fade-out var(--dur-exit) ease-in forwards;
+}
+.modal-dialog.closing .modal-card {
+  animation: none;
+}
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.modal-head-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.modal-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-amber);
+  margin: 0;
+}
+.modal-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-heading);
+  margin: 0;
+}
+.modal-title:focus {
+  outline: none;
+}
+.modal-head .btn-icon {
+  margin: -10px -10px 0 0;
+}
+
+/* ─── Sheet (§8.11): a modal from 900px up ───────────────────── */
+
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  width: min(100%, 560px);
+  max-width: none;
+  max-height: 90dvh;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+  border-radius: var(--corner-xl) var(--corner-xl) 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--sheet-bg);
+  color: var(--text-body);
+  animation: sheet-in var(--spring-spatial-calm-dur) var(--spring-spatial-calm);
+}
+.sheet:not([open]) {
+  display: none;
+}
+.sheet::backdrop {
+  background: var(--modal-backdrop);
+  animation: fade-in var(--spring-effects-slow-dur) var(--spring-effects-slow);
+}
+.sheet-handle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 4px;
+  margin: var(--space-2) auto 0;
+  border-radius: var(--corner-full);
+  background: var(--border);
+}
+.sheet-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+}
+.sheet-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-heading);
+  margin: 0;
+}
+.sheet-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--space-5) calc(var(--space-5) + var(--inset-bottom));
+}
+.sheet.closing {
+  animation: sheet-out var(--dur-exit) ease-in forwards;
+}
+@media (min-width: 900px) {
+  .sheet {
+    inset: 0;
+    margin: auto;
+    max-height: min(90dvh, 720px);
+    border: 1px solid rgba(var(--accent-amber-rgb), 0.3);
+    border-radius: var(--corner-xl);
+    box-shadow:
+      0 30px 80px rgba(var(--shadow-rgb), calc(0.7 * var(--shadow-strength))),
+      0 0 80px rgba(var(--accent-amber-rgb), 0.18);
+    animation: modal-in var(--spring-spatial-default-dur) var(--spring-spatial-default);
+  }
+  .sheet.closing {
+    animation-name: fade-out;
+  }
+  .sheet-handle {
+    display: none;
+  }
+  .sheet-head {
+    padding-top: var(--space-5);
+  }
+}
+
+/* ─── Toast and undo (§8.12) ─────────────────────────────────── */
+
+.toast-layer,
+.toast-region {
+  display: contents;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-5) + var(--inset-bottom) + var(--toast-lift, 0px));
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: max-content;
+  max-width: min(100% - 2rem, 480px);
+  padding: 0.75rem 1.25rem;
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--corner-lg);
+  box-shadow: 0 12px 32px rgba(var(--shadow-rgb), calc(0.45 * var(--shadow-strength)));
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-body);
+  transform: translateX(-50%);
+  animation: toast-in var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+/* A celebration or a found easter egg (§11.3): the toast arrives with a little more joy. */
+.toast[data-kind='celebrate'] {
+  border-color: rgba(var(--accent-bright-rgb), 0.6);
+  box-shadow:
+    0 12px 32px rgba(var(--shadow-rgb), calc(0.45 * var(--shadow-strength))),
+    0 0 40px rgba(var(--accent-bright-rgb), 0.25);
+  animation: toast-pop var(--spring-spatial-slow-dur) var(--spring-spatial-slow);
+}
+.toast-text {
+  flex: 1;
+  min-width: 0;
+}
+.toast-action {
+  flex-shrink: 0;
+  min-height: 32px;
+  margin: -0.375rem -0.5rem -0.375rem 0;
+  padding: 0 0.5rem;
+  border-radius: var(--corner-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-amber);
+}
+.toast.leaving {
+  animation: toast-out var(--dur-exit) ease-in forwards;
+}
+/* A FAB on screen: the toast sits above it. */
+body:has(.fab) {
+  --toast-lift: 72px;
+}
+
+/* ─── Notice banner (§8.13) ──────────────────────────────────── */
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgba(var(--accent-amber-rgb), 0.3);
+  border-radius: var(--corner-md);
+  background: var(--notice-bg);
+  color: var(--text-body);
+  text-align: left;
+}
+.notice > svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--accent-amber);
+}
+.notice-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.notice-title {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-heading);
+}
+.notice-detail {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.notice.is-success {
+  background: var(--success-bg);
+  border-color: rgba(var(--accent-sage-rgb), 0.35);
+}
+.notice.is-success > svg {
+  color: var(--accent-sage);
+}
+.notice.is-error {
+  background: var(--error-bg);
+  border-color: rgba(var(--danger-rgb), 0.35);
+}
+.notice.is-error > svg {
+  color: var(--danger);
+}
+button.notice {
+  cursor: pointer;
+}
+button.notice > .notice-chevron {
+  align-self: center;
+  color: var(--text-faint);
+}
+
+/* ─── Empty states (§8.14) ───────────────────────────────────── */
+
+/* Nothing here yet. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 4rem 2rem;
+  border: 1px dashed var(--border-soft);
+  border-radius: var(--corner-xl);
+  text-align: center;
+}
+/* The empty-state icon drifts, slowly, as if waiting for company (§11.3). */
+.empty-state > svg {
+  width: 40px;
+  height: 40px;
+  stroke-width: 1.25;
+  color: var(--text-faint);
+  animation: dd-float 6s ease-in-out infinite;
+}
+.empty-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-heading);
+  margin: 0;
+}
+.empty-text {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+  max-width: 32ch;
+  margin: 0;
+}
+.empty-state .btn {
+  margin-top: var(--space-3);
+}
+/* Nothing matches. */
+.empty-match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+/* ─── Figures (§8.15) ────────────────────────────────────────── */
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--panel-bg-faint);
+  text-align: center;
+}
+.meter {
+  height: 4px;
+  border-radius: var(--corner-full);
+  background: var(--chart-track);
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: var(--corner-full);
+  background: var(--accent-amber);
+  transform-origin: left;
+  transition:
+    width var(--spring-spatial-default-dur) var(--spring-spatial-default),
+    transform var(--spring-spatial-default-dur) var(--spring-spatial-default),
+    background-color var(--spring-effects-default-dur) var(--spring-effects-default);
+}
+.meter-fill.is-complete {
+  background: var(--accent-sage);
+}
+
+/* ─── Switch row (§8.18) ─────────────────────────────────────── */
+
+/* A settings switch: the whole row is the target. */
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-3) 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border-faint);
+  cursor: pointer;
+}
+.switch-row:last-child {
+  border-bottom: 0;
+}
+.switch-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.switch-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.switch-label {
+  color: var(--text-heading);
+  font-size: 0.9375rem;
+}
+.switch-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--chart-track);
+  border: 1px solid var(--border);
+  transition:
+    background-color var(--spring-effects-default-dur) var(--spring-effects-default),
+    border-color var(--spring-effects-default-dur) var(--spring-effects-default);
+}
+/* The knob is small when off, grows when on, and swells under the finger. */
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+  background: var(--text-dim);
+  scale: 0.75;
+  transition:
+    transform var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    scale var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    background-color var(--spring-effects-default-dur) var(--spring-effects-default);
+}
+.switch-row:active .switch-knob {
+  scale: 1.1;
+}
+.switch-row[aria-checked='true'] .switch-track {
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
+}
+.switch-row[aria-checked='true'] .switch-knob {
+  transform: translateX(18px);
+  background: var(--on-accent);
+  scale: 1;
+}
+
+/* ─── Timer chip (§8.19) ─────────────────────────────────────── */
+
+/* A running countdown: label, mono time, then its controls as icon buttons. */
+.timer-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: 0 var(--space-1) 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--corner-lg-plus);
+  background: var(--chip-bg);
+  color: var(--text-strong);
+}
+.timer-chip-label {
+  display: flex;
+  flex-direction: column;
+  margin-right: var(--space-2);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  color: var(--text-dim);
+}
+.timer-chip-time {
+  min-width: 4ch;
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-amber);
+}
+.timer-chip.is-paused .timer-chip-time {
+  color: var(--text-dim);
+}
+.timer-chip.is-done {
+  border-color: var(--accent-bright);
+  background: rgba(var(--accent-bright-rgb), 0.14);
+}
+.timer-chip.is-done .timer-chip-time {
+  color: var(--accent-bright);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .timer-chip.is-done {
+    animation: timer-ring 1.2s var(--ease-standard) infinite alternate;
+  }
+  /* The time rattles like a kitchen timer; the buttons beside it hold still
+     so they stay easy to hit. */
+  .timer-chip.is-done .timer-chip-time {
+    display: inline-block;
+    animation: dd-wiggle 1.2s var(--ease-standard) infinite;
+  }
+}
+
+/* ─── Motion (§11) ───────────────────────────────────────────── */
+
+@keyframes timer-ring {
+  from {
+    background: rgba(var(--accent-bright-rgb), 0.06);
+  }
+  to {
+    background: rgba(var(--accent-bright-rgb), 0.22);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(24px) scale(0.9);
+  }
+}
+@keyframes toast-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(32px) scale(0.6) rotate(-4deg);
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.96);
+  }
+}
+
+/* ─── Expressive type (§5.2) ─────────────────────────────────── */
+
+/* The emphasized voice: heavier Fraunces for the one number or word that
+   matters on a screen (a finished count, a perfect score, a celebration). */
+.t-emphasized {
+  font-weight: var(--weight-emphasized);
+}
+.t-display-emphasized {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-emphasized);
+  font-size: 3.5rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-heading);
+}
+.t-display-emphasized em {
+  font-weight: var(--weight-heavy);
+  color: var(--accent-amber);
+}
+
+/* ─── Shapes and loading (§6.4, §8.20, §8.21) ────────────────── */
+
+/* Loading indicator: a shape that morphs between Expressive shapes while it
+   turns. LoadingIndicator.svelte drives the morph; this is its frame. */
+.loading-indicator {
+  --size: 48px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--size);
+  height: var(--size);
+}
+.loading-indicator.is-contained {
+  border-radius: var(--corner-full);
+  background: rgba(var(--accent-amber-rgb), 0.14);
+}
+.loading-indicator-shape {
+  width: 68%;
+  height: 68%;
+  background: var(--accent-amber);
+  animation: dd-spin 4.2s linear infinite;
+}
+.loading-indicator.is-contained .loading-indicator-shape {
+  width: 56%;
+  height: 56%;
+}
+
+/* Wavy progress: the bar ripples while it works and flattens when it rests. */
+.wavy-progress-frame {
+  display: block;
+  width: 100%;
+}
+.wavy-progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  overflow: visible;
+  color: var(--accent-amber);
+}
+.wavy-progress-track {
+  stroke: var(--chart-track);
+}
+.wavy-progress-wave {
+  stroke: currentColor;
+  transition: d var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+.wavy-progress-moving {
+  animation: dd-wave var(--wave-period, 1.2s) linear infinite;
+}
+.wavy-progress.is-complete {
+  color: var(--accent-sage);
+}
+
+/* Shaped thumbnails and avatars: clip-path from the Expressive shape set
+   (shapeClipPath() in the package), morphing on hover. */
+.dd-shape {
+  clip-path: var(--shape, none);
+  transition: clip-path var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+.dd-shape:hover {
+  clip-path: var(--shape-hover, var(--shape, none));
+}
+
+/* ─── Delight (§11.3) ────────────────────────────────────────── */
+
+/* Lists settle in one after another the first time they appear. Put
+   .dd-stagger on the list; each child after the twelfth arrives with the twelfth. */
+.dd-stagger > * {
+  animation: dd-rise var(--spring-spatial-default-dur) var(--spring-spatial-default) both;
+  animation-delay: calc(min(var(--dd-i, 12), 12) * 35ms);
+}
+.dd-stagger > :nth-child(1) { --dd-i: 0; }
+.dd-stagger > :nth-child(2) { --dd-i: 1; }
+.dd-stagger > :nth-child(3) { --dd-i: 2; }
+.dd-stagger > :nth-child(4) { --dd-i: 3; }
+.dd-stagger > :nth-child(5) { --dd-i: 4; }
+.dd-stagger > :nth-child(6) { --dd-i: 5; }
+.dd-stagger > :nth-child(7) { --dd-i: 6; }
+.dd-stagger > :nth-child(8) { --dd-i: 7; }
+.dd-stagger > :nth-child(9) { --dd-i: 8; }
+.dd-stagger > :nth-child(10) { --dd-i: 9; }
+.dd-stagger > :nth-child(11) { --dd-i: 10; }
+.dd-stagger > :nth-child(12) { --dd-i: 11; }
+
+/* Cards and rows that are a whole target give a little under the finger,
+   and lift towards a fine pointer on hover. The doubled class outranks an
+   app's own card rule, so the transition list here carries the usual card
+   colour changes too. */
+.dd-pressable.dd-pressable,
+.dd-lift.dd-lift {
+  transition:
+    background-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    border-color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    color var(--spring-effects-fast-dur) var(--spring-effects-fast),
+    box-shadow var(--spring-effects-default-dur) var(--spring-effects-default),
+    border-radius var(--spring-spatial-fast-dur) var(--spring-spatial-fast),
+    transform var(--spring-spatial-default-dur) var(--spring-spatial-default);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dd-lift.dd-lift:hover {
+    transform: translateY(-3px) rotate(var(--dd-tilt, -0.4deg));
+  }
+}
+.dd-pressable.dd-pressable:active {
+  transform: scale(0.98);
+}
+
+/* One-shot flourishes, played with play(node, 'wiggle') from the package. */
+.dd-pop {
+  animation: dd-pop var(--spring-spatial-fast-dur) var(--spring-spatial-fast);
+}
+.dd-wiggle {
+  animation: dd-wiggle 600ms var(--ease-standard);
+}
+.dd-jelly {
+  animation: dd-jelly 700ms var(--ease-standard);
+}
+.dd-tada {
+  animation: dd-tada 900ms var(--ease-standard);
+}
+.dd-spin-once {
+  animation: dd-spin var(--spring-spatial-slow-dur) var(--spring-spatial-slow);
+}
+.dd-flip {
+  animation: dd-flip 800ms var(--spring-spatial-default);
+}
+.dd-heartbeat {
+  animation: dd-heartbeat 900ms var(--ease-standard);
+}
+
+/* The celebration layer: confetti from celebrate(). */
+.dd-confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+  overflow: hidden;
+}
+.dd-confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  will-change: transform, opacity;
+}
+.dd-confetti.is-glyph {
+  width: auto;
+  height: auto;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  line-height: 1;
+  background: none;
+}
+
+/* ─── Motion (§11) ───────────────────────────────────────────── */
+
+@keyframes dd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes dd-pop {
+  0% {
+    transform: scale(0.8);
+  }
+}
+@keyframes dd-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-6deg);
+  }
+  40% {
+    transform: rotate(5deg);
+  }
+  60% {
+    transform: rotate(-3deg);
+  }
+  80% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes dd-jelly {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  30% {
+    transform: scale(1.15, 0.85);
+  }
+  45% {
+    transform: scale(0.9, 1.1);
+  }
+  60% {
+    transform: scale(1.05, 0.95);
+  }
+  80% {
+    transform: scale(0.98, 1.02);
+  }
+}
+@keyframes dd-tada {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  10%,
+  20% {
+    transform: scale(0.92) rotate(-3deg);
+  }
+  30%,
+  50%,
+  70% {
+    transform: scale(1.08) rotate(3deg);
+  }
+  40%,
+  60% {
+    transform: scale(1.08) rotate(-3deg);
+  }
+}
+@keyframes dd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dd-flip {
+  from {
+    transform: perspective(600px) rotateY(-180deg);
+  }
+}
+@keyframes dd-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.18);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+}
+@keyframes dd-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+}
+@keyframes dd-wave {
+  to {
+    transform: translateX(calc(-1 * var(--wave-length, 24px)));
+  }
+}
+
+/* Browsers without linear() fall back to the settle curve: no overshoot,
+   same durations. */
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring-spatial-fast: var(--ease-settle);
+    --spring-spatial-default: var(--ease-settle);
+    --spring-spatial-slow: var(--ease-settle);
+    --spring-spatial-calm: var(--ease-settle);
+    --spring-effects-fast: var(--ease-standard);
+    --spring-effects-default: var(--ease-standard);
+    --spring-effects-slow: var(--ease-standard);
+  }
+}
+
+/* Reduced motion (§15): nothing moves. Springs settle at once, flourishes and
+   loops stop, and only short opacity fades remain. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-hover: 0ms;
+    --dur-toggle: 0ms;
+    --dur-settle: 0ms;
+    --dur-enter: 100ms;
+    --dur-exit: 100ms;
+    --spring-spatial-fast-dur: 0ms;
+    --spring-spatial-default-dur: 0ms;
+    --spring-spatial-slow-dur: 0ms;
+    --spring-spatial-calm-dur: 0ms;
+    --spring-effects-fast-dur: 0ms;
+    --spring-effects-default-dur: 100ms;
+    --spring-effects-slow-dur: 100ms;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .modal-card,
+  .sheet,
+  .toast,
+  .toast[data-kind='celebrate'] {
+    animation: fade-in 100ms linear;
+  }
+  .btn:active:not(:disabled),
+  .btn-icon:active,
+  .fab:active,
+  .chip:active,
+  .segmented button:active,
+  .dd-pressable.dd-pressable:active,
+  .dd-lift.dd-lift:hover,
+  .fab:hover svg,
+  .btn:hover:not(:disabled) svg {
+    transform: none;
+  }
+  .theme-toggle:active .knob,
+  .switch-row:active .switch-knob {
+    scale: none;
+  }
+  .empty-state > svg,
+  .loading-indicator-shape,
+  .wavy-progress-moving,
+  .dd-stagger > *,
+  .dd-pop,
+  .dd-wiggle,
+  .dd-jelly,
+  .dd-tada,
+  .dd-spin-once,
+  .dd-flip,
+  .dd-heartbeat {
+    animation: none;
+  }
+  .dd-confetti-layer {
+    display: none;
+  }
+}

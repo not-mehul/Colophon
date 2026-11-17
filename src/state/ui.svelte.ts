@@ -1,5 +1,5 @@
 // Navigation and transient UI state: the tab, the toast, confirm requests and
-// the overlay stack that Android's back button unwinds.
+// the overlay stack that Escape unwinds.
 
 export type Tab = 'inspection' | 'imprint' | 'chapters' | 'catalog';
 export type ToastKind = 'success' | 'error' | 'info' | 'celebrate';
@@ -60,9 +60,6 @@ class UiState {
   cropImage = $state.raw<{ bytes: Uint8Array; mediaType: string } | null>(null);
   toast = $state.raw<Toast | null>(null);
   confirmRequest = $state.raw<ConfirmRequest | null>(null);
-  /** Called by back when no overlay is open and an edition is on the bench. */
-  onLeaveEdition: (() => boolean) | null = null;
-
   private closers: (() => void)[] = [];
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
   private toastKey = 0;
@@ -146,24 +143,12 @@ class UiState {
     };
   }
 
-  /**
-   * Android back (style.md §14): the topmost overlay first, then back to
-   * Inspection, then off the bench to the library. False when the app should exit.
-   */
-  back(): boolean {
+  /** Escape: closes the topmost overlay. False when none is open. */
+  closeTop(): boolean {
     const close = this.closers.at(-1);
-    if (close) {
-      close();
-      return true;
-    }
-    if (this.onLeaveEdition) {
-      if (this.tab !== 'inspection') {
-        this.go('inspection');
-        return true;
-      }
-      return this.onLeaveEdition();
-    }
-    return false;
+    if (!close) return false;
+    close();
+    return true;
   }
 }
 

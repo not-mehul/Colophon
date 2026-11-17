@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// End-to-end tests run the production web build in Chromium at phone size.
-// In the browser Colophon keeps its library in IndexedDB and binds by download,
-// so the whole UI can be exercised without a device.
+// End-to-end tests run the single-file build in Chromium at phone size, served
+// by vite preview, and once straight from disk (standalone.spec.ts). Colophon
+// keeps its library in IndexedDB and binds by download.
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,

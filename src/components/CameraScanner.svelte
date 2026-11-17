@@ -1,6 +1,6 @@
 <script lang="ts">
-  // The camera modal for scanning an ISBN where the Code Scanner isn't
-  // available (iOS, browsers). Stacks above whatever is open; back cancels.
+  // The camera modal for scanning an ISBN. Stacks above whatever is open;
+  // Escape cancels.
   import { makeDecoder } from '../platform/barcode';
   import { ui } from '../state/ui.svelte';
   import Icon from './ui/Icon.svelte';

@@ -12,7 +12,6 @@ import { formatFileName, numberChapters } from '../epub/filename';
 import { replaceInChapters, type FindOptions } from '../epub/find-replace';
 import { oversizedImages } from '../epub/images';
 import { shrinkImage } from '../render/shrink';
-import { openInRosetta } from '../platform/handoff';
 import { imageMime, imageSize } from '../epub/image-size';
 import { openEpub } from '../epub/open';
 import { tocFromChapters } from '../epub/toc';
@@ -145,7 +144,6 @@ class BenchState {
   private show(id: string, edition: Edition, draft: Draft): void {
     this.flush();
     this.lastTier = -1;
-    this.lastBound = null;
     this.edition = edition;
     this.draft = draft;
     this.id = id;
@@ -156,7 +154,6 @@ class BenchState {
   close(): void {
     this.flush();
     this.edition = null;
-    this.lastBound = null;
     this.id = null;
     this.draft = emptyDraft();
     void settings.update({ lastEditionId: null });
@@ -469,7 +466,7 @@ class BenchState {
       });
       const name = this.exportName;
       const stored = library.get(id);
-      const saved = await saveFile({ name, data: bytes, mime: EPUB_MIME }, stored?.savedPath ?? null);
+      const saved = await saveFile({ name, data: bytes, mime: EPUB_MIME });
       const reopened = openEpub(bytes, name);
       const draft = newDraft(reopened);
       const score = this.scoreOf(reopened, draft);
@@ -491,29 +488,12 @@ class BenchState {
       );
       this.edition = reopened;
       this.draft = draft;
-      this.lastBound = { name, bytes };
       ui.notify(`Bound and saved to ${saved.label.replace(/\/[^/]*$/, '')}.`, 'success', saved.uri ? { label: 'Share', run: () => void this.share() } : undefined);
     } catch (err) {
       ui.notify(`Couldn't bind the EPUB (${err instanceof Error ? err.message : String(err)}). Your edits are still here; try again.`, 'error');
     } finally {
       this.busy = null;
     }
-  }
-
-  /** The file just bound, for "Read in Rosetta". */
-  lastBound = $state.raw<{ name: string; bytes: Uint8Array } | null>(null);
-
-  /** Opens the bound edition in Rosetta, passed as a file (Open with). */
-  async readInRosetta(): Promise<void> {
-    const edition = this.edition;
-    if (!edition) return;
-    const bytes =
-      this.lastBound && !this.changes
-        ? this.lastBound.bytes
-        : bind(edition, $state.snapshot(this.draft) as Draft, { level: settings.value.compression, dualCoverTags: settings.value.dualCoverTags, purgeOrphans: settings.value.purgeOrphans });
-    const opened = await openInRosetta(this.exportName, bytes);
-    if (opened === 'missing') ui.notify('Rosetta isn’t installed. Share the EPUB to open it in another reader.', 'error', { label: 'Share', run: () => void this.share() });
-    else if (opened === 'failed') ui.notify('Couldn’t open Rosetta. Try sharing the EPUB instead.', 'error');
   }
 
   /** Shares the edition as it stands: bound with the current edits. */

@@ -1,9 +1,7 @@
-// The theme on screen: System, Dusk (dark) or Dawn (light). Paints data-theme,
-// the theme-color meta, and the system bars (style.md §2, §14).
+// The theme on screen: System, Dusk (dark) or Dawn (light). Paints data-theme
+// and the theme-color meta (style.md §2).
 
-import { SystemBars, SystemBarsStyle } from '@capacitor/core';
 import type { ThemeSetting } from '../state/settings';
-import { isNative } from './native';
 
 /** Read by the inline script in index.html, so the first paint has the right theme. */
 const STORAGE_KEY = 'colophon.theme';
@@ -25,10 +23,6 @@ function paint(): void {
   shown.dark = theme === 'dark';
   const surface = getComputedStyle(document.documentElement).getPropertyValue('--bg-grad-mid').trim();
   if (surface) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', surface);
-  if (isNative) {
-    // DARK = light icons for dark backgrounds.
-    void SystemBars.setStyle({ style: theme === 'dark' ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(() => undefined);
-  }
   dispatchEvent(new Event('themechange'));
 }
 

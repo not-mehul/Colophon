@@ -1,15 +1,14 @@
-// Downloading a catalog cover. In the apps, native HTTP has no CORS; in a
-// browser, a cover host that sends no CORS headers needs the proxy from Settings.
+// Downloading a catalog cover. A cover host that sends no CORS headers needs
+// the proxy from Settings.
 
 import { imageMime } from '../epub/image-size';
 import { getBytes } from '../platform/http';
-import { isNative } from '../platform/native';
 import { largerCover } from './match';
 
 export async function fetchCover(url: string, corsProxy = ''): Promise<{ bytes: Uint8Array; mediaType: string }> {
   const target = largerCover(url);
   const attempts = [target];
-  if (!isNative && corsProxy.trim()) attempts.push(corsProxy.includes('{url}') ? corsProxy.replace('{url}', encodeURIComponent(target)) : `${corsProxy.trim()}${encodeURIComponent(target)}`);
+  if (corsProxy.trim()) attempts.push(corsProxy.includes('{url}') ? corsProxy.replace('{url}', encodeURIComponent(target)) : `${corsProxy.trim()}${encodeURIComponent(target)}`);
   let last: unknown = null;
   for (const at of attempts) {
     try {
@@ -23,5 +22,5 @@ export async function fetchCover(url: string, corsProxy = ''): Promise<{ bytes: 
       last = err;
     }
   }
-  throw new Error(!isNative && !corsProxy ? 'the cover host blocks browsers; add a CORS proxy in Settings' : last instanceof Error ? last.message : 'download failed');
+  throw new Error(!corsProxy ? 'the cover host blocks browsers; add a CORS proxy in Settings' : last instanceof Error ? last.message : 'download failed');
 }
